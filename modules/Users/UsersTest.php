@@ -58,7 +58,7 @@ class UsersTest extends TestCase {
 			'phone_work' => '',
 			'department' => '',
 			'phone_mobile' => '',
-			'reports_to_id' => '',
+			'reports_to_id' => '0',
 			'phone_other' => '',
 			'email2' => '',
 			'phone_fax' => '',
@@ -94,7 +94,11 @@ class UsersTest extends TestCase {
 			'currency_symbol' => '&#8364;',
 			'conv_rate' => '1.000000',
 			'imagenameimageinfo' => '',
+			'ename' => '',
 		);
+		if (empty($user->column_fields['reports_to_id'])) { // can be empty string or null too
+			$user->column_fields['reports_to_id']= '0';
+		}
 		$this->assertEquals($expected, $user->column_fields, 'retrieveCurrentUserInfoFromFile admin');
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(8);
@@ -153,6 +157,7 @@ class UsersTest extends TestCase {
 			'currency_symbol' => '&#8364;',
 			'conv_rate' => '1.000000',
 			'imagenameimageinfo' => '',
+			'ename' => '',
 		);
 		$this->assertEquals($expected, $user->column_fields, 'retrieveCurrentUserInfoFromFile testes');
 		$user = new Users();
@@ -212,7 +217,11 @@ class UsersTest extends TestCase {
 			'currency_symbol' => '&#8364;',
 			'conv_rate' => '1.000000',
 			'imagenameimageinfo' => '',
+			'ename' => '',
 		);
+		if ($user->column_fields['currency_symbol']=='€') {
+			$expected['currency_symbol']='€';
+		}
 		$this->assertEquals($expected, $user->column_fields, 'retrieveCurrentUserInfoFromFile inactive');
 	}
 }

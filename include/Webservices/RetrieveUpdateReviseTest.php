@@ -353,11 +353,11 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 			'description' => '<p><IMG SRC=javascript:alert(String.fromCharCode(88,83,83))/><<SCRIPT>alert("XSS");//<</SCRIPT><IMG """><SCRIPT>alert("XSS")</SCRIPT>script>alert("Ahh, once again bypassed your system, sorry :( *evil laugh*");<<SCRIPT>alert("XSS");//<</SCRIPT><IMG """><SCRIPT>alert("XSS")</SCRIPT>/script><img SRC="jav ascript:alert(\'XSS\');" style="height:512px;width:512px;" alt="human_head_reference_picture_front - Copy.jpg" /><img onerror="sfs" aalt="" src="http://{siteURL}.com/assets/images/human_head_reference_picture_front%20-%20Copy.jpg" style="height:512px; width:512px" /></p>',
 			'id' => '1x4985',
 			'cbuuid' => '5261bade9b0ee17c0ff2c44fdff1f71e1dd733bf',
-			'product_idename' => array(
-				'module' => 'Products',
-				'reference' => 'New Arrival Metal Aluminum Case for iPhone 6',
-				'cbuuid' => 'efdf5dc4d4aab1a3bd158e3324554e4d54bbc27f',
-			),
+			// 'product_idename' => array(
+			// 	'module' => 'Products',
+			// 	'reference' => 'New Arrival Metal Aluminum Case for iPhone 6',
+			// 	'cbuuid' => 'efdf5dc4d4aab1a3bd158e3324554e4d54bbc27f',
+			// ),
 			'modifiedbyename' => array(
 				'module' => 'Users',
 				'reference' => 'cbTest testmdy',
@@ -561,8 +561,8 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 		$this->assertEquals($expected, $beforeCto['update_log']);
 		$updateCto = $beforeCto;
 		$updateCto['ticketpriorities'] = 'Low';
-		$date = date('l dS F Y h:i:s A');
 		vtws_update($updateCto, $current_user);
+		$date = date('l dS F Y h:i:s A');
 		$actual = vtws_retrieve($ctoID.'x2728', $current_user);
 		$this->assertEquals('Low', $actual['ticketpriorities'], 'update ticketpriorities');
 		$this->assertEquals($expected.' Priority Changed to Low\. -- '.$date.' by admin--//--', $actual['update_log']);
@@ -660,6 +660,32 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 		$this->assertFalse(isset($actual['imagenameimageinfo']), 'has no image information');
 		unset($beforeCto['modifiedby'], $beforeCto['modifiedtime'], $actual['modifiedby'], $actual['modifiedtime']);
 		$this->assertEquals($beforeCto, $actual);
+	}
+
+	/**
+	 * Method testUpdateExceptionInvalidImage
+	 * @test
+	 * @expectedException WebServiceException
+	 */
+	public function testUpdateExceptionInvalidImage() {
+		global $current_user, $adb;
+		$current_user = Users::getActiveAdminUser();
+		$ctoID = vtws_getEntityId('Contacts');
+		$beforeCto = vtws_retrieve($ctoID.'x1561', $current_user);
+		// get file and file information
+		$finfo = finfo_open(FILEINFO_MIME); // return mime type ala mimetype extension.
+		$filename = 'build/coreBOSTests/database/924495-agri90.png';
+		$mtype = finfo_file($finfo, $filename);
+		$model_filename = array(
+			'name'=>basename($filename),  // no slash nor paths in the name
+			'size'=>filesize($filename),
+			'type'=>$mtype,
+			'content'=>base64_encode(file_get_contents($filename))
+		);
+		$updateCto = $beforeCto;
+		$updateCto['attachments'] = array('imagename' => $model_filename);
+		$updateCto['lastname'] = 'áçèñtös';
+		vtws_update($updateCto, $current_user);
 	}
 
 	/**
@@ -782,11 +808,11 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 ',
 			'id' => '29x4124',
 			'cbuuid' => '35eec5e421b97c8feb3045e6476dbff6a2aeb920',
-			'productename' => array(
-				'module' => 'Products',
-				'reference' => 'Car Sunshade Windshield Cover / Car Snow Cover',
-				'cbuuid' => '08b6499c06f49c16689928879243b21e61928a5c',
-			),
+			// 'productename' => array(
+			// 	'module' => 'Products',
+			// 	'reference' => 'Car Sunshade Windshield Cover / Car Snow Cover',
+			// 	'cbuuid' => '08b6499c06f49c16689928879243b21e61928a5c',
+			// ),
 			'invoiceidename' => array(
 				'module' => 'Invoice',
 				'reference' => 'Dream Master',
@@ -828,8 +854,8 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 		$expected['account'] = '11x131';
 		$expected['assetname'] = $newValues['assetname'];
 		$expected['description'] = $newValues['description'];
-		$expected['productename']['reference'] = 'New FULL HD 1080P Car Video Recorder With G-Sensor and 24H Parking mode';
-		$expected['productename']['cbuuid'] = '0a3c5c965d2c42e246349fee0e919ef22f4c80d3';
+		// $expected['productename']['reference'] = 'New FULL HD 1080P Car Video Recorder With G-Sensor and 24H Parking mode';
+		// $expected['productename']['cbuuid'] = '0a3c5c965d2c42e246349fee0e919ef22f4c80d3';
 		$expected['accountename']['reference'] = 'Computer Repair Service';
 		$expected['accountename']['cbuuid'] = 'c96bc3d37a773ddf9aa2e75b4ca02a25e5a356a4';
 		$expected['invoiceidename']['reference'] = 'Ept-Rass';
@@ -914,11 +940,11 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 			'description' => '<p><IMG SRC=javascript:alert(String.fromCharCode(88,83,83))/><<SCRIPT>alert("XSS");//<</SCRIPT><IMG """><SCRIPT>alert("XSS")</SCRIPT>script>alert("Ahh, once again bypassed your system, sorry :( *evil laugh*");<<SCRIPT>alert("XSS");//<</SCRIPT><IMG """><SCRIPT>alert("XSS")</SCRIPT>/script><img SRC="jav ascript:alert(\'XSS\');" style="height:512px;width:512px;" alt="human_head_reference_picture_front - Copy.jpg" /><img onerror="sfs" aalt="" src="http://{siteURL}.com/assets/images/human_head_reference_picture_front%20-%20Copy.jpg" style="height:512px; width:512px" /></p>',
 			'id' => '1x4985',
 			'cbuuid' => '5261bade9b0ee17c0ff2c44fdff1f71e1dd733bf',
-			'product_idename' => array(
-				'module' => 'Products',
-				'reference' => 'New Arrival Metal Aluminum Case for iPhone 6',
-				'cbuuid' => 'efdf5dc4d4aab1a3bd158e3324554e4d54bbc27f',
-			),
+			// 'product_idename' => array(
+			// 	'module' => 'Products',
+			// 	'reference' => 'New Arrival Metal Aluminum Case for iPhone 6',
+			// 	'cbuuid' => 'efdf5dc4d4aab1a3bd158e3324554e4d54bbc27f',
+			// ),
 			'modifiedbyename' => array(
 				'module' => 'Users',
 				'reference' => 'cbTest testdmy',
@@ -1070,7 +1096,7 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 		$adb->query("update vtiger_contactdetails set lastname='Saltman', imagename='' where contactid=1561");
 		$actual = vtws_retrieve($ctoID.'x1561', $current_user);
 		$this->assertFalse(isset($actual['imagenameimageinfo']), 'has no image information');
-		$beforeCto['portalloginuser'] = '19x0';
+		$beforeCto['portalloginuser'] = '';
 		unset($beforeCto['modifiedby'], $beforeCto['modifiedtime'], $actual['modifiedby'], $actual['modifiedtime']);
 		$this->assertEquals($beforeCto, $actual);
 	}

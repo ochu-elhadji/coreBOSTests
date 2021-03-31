@@ -183,6 +183,16 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 									from vtiger_cbtranslation
 									where locale="en_us" and forpicklist="Invoice::invoicestatus" and i18n = \'Created\') OR vtiger_invoice.invoicestatus = \'Created\') )) AND vtiger_invoice.invoiceid > 0';
 		$this->assertEquals($expected, $actual);
+		//////////////////////
+		$wfvals['test'] = '';
+		$wfvals['select_expressions'] = '[{"fieldname":"randomstringres","operation":"is","value":"randomstring(12)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = 'SELECT REPLACE(vtiger_invoice.subject,\'x\',\'a\') AS stringreplaceres FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_invoice.invoicestatus IN (
+									select translation_key
+									from vtiger_cbtranslation
+									where locale="en_us" and forpicklist="Invoice::invoicestatus" and i18n = \'Created\') OR vtiger_invoice.invoicestatus = \'Created\') )) AND vtiger_invoice.invoiceid > 0';
+		$this->assertEquals($expected, $actual);
 	}
 
 	/**
@@ -401,7 +411,7 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 		$wfvals['select_expressions'] = '[{"fieldname":"ifelseres","operation":"is","value":"ifelse(substring(firstname,1,2)==\'IT\',\'\',substring(firstname,1,2))","valuetype":"expression","joincondition":"and","groupid":"0"}]';
 		$workflow->setup($wfvals);
 		$actual = $workflowScheduler->getWorkflowQuery($workflow);
-		$expected = "SELECT IF(SUBSTRING(vtiger_contactdetails.firstname,1,2)=='IT','',SUBSTRING(vtiger_contactdetails.firstname,1,2)) AS ifelseres FROM vtiger_contactdetails  INNER JOIN vtiger_crmentity ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_contactdetails.firstname > UPPER(vtiger_contactdetails.lastname)) )) AND vtiger_contactdetails.contactid > 0";
+		$expected = "SELECT IF(SUBSTRING(vtiger_contactdetails.firstname,1,2)='IT','',SUBSTRING(vtiger_contactdetails.firstname,1,2)) AS ifelseres FROM vtiger_contactdetails  INNER JOIN vtiger_crmentity ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_contactdetails.contactid > 0";
 		$this->assertEquals($expected, $actual);
 	}
 
@@ -721,17 +731,35 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 		$wfvals['select_expressions'] = '[{"fieldname":"reltype","operation":"is","value":"getEntityType(related_to)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
 		$workflow->setup($wfvals);
 		$actual = $workflowScheduler->getWorkflowQuery($workflow);
-		$expected = 'SELECT (select setype from vtiger_crmentity where vtiger_crmentity.crmid=vtiger_potential.related_to) AS reltype FROM vtiger_potential  INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_potential.potentialid > 0';
+		$expected = 'SELECT (select setype from vtiger_crmobject where vtiger_crmobject.crmid=vtiger_potential.related_to) AS reltype FROM vtiger_potential  INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_potential.potentialid > 0';
 		$this->assertEquals($expected, $actual);
 		$wfvals['select_expressions'] = '[{"fieldname":"reltype","operation":"is","value":"getEntityType(id)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
 		$workflow->setup($wfvals);
 		$actual = $workflowScheduler->getWorkflowQuery($workflow);
-		$expected = 'SELECT (select setype from vtiger_crmentity where vtiger_crmentity.crmid=0) AS reltype FROM vtiger_potential  INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_potential.potentialid > 0';
+		$expected = 'SELECT (select setype from vtiger_crmobject where vtiger_crmobject.crmid=0) AS reltype FROM vtiger_potential  INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_potential.potentialid > 0';
 		$this->assertEquals($expected, $actual);
 		$wfvals['select_expressions'] = '[{"fieldname":"reltype","operation":"is","value":"getEntityType(nonexistentfield)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
 		$workflow->setup($wfvals);
 		$actual = $workflowScheduler->getWorkflowQuery($workflow);
-		$expected = 'SELECT (select setype from vtiger_crmentity where vtiger_crmentity.crmid=nonexistentfield) AS reltype FROM vtiger_potential  INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_potential.potentialid > 0';
+		$expected = 'SELECT (select setype from vtiger_crmobject where vtiger_crmobject.crmid=nonexistentfield) AS reltype FROM vtiger_potential  INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_potential.potentialid > 0';
+		$this->assertEquals($expected, $actual);
+	}
+
+	/**
+	 * Method testgetIDof
+	 * @test
+	 */
+	public function testgetIDof() {
+		global $adb;
+		$workflowScheduler = new WorkFlowScheduler($adb);
+		$workflow = new Workflow();
+		$wfvals = $this->defaultWF;
+		$wfvals['module_name'] = 'Potentials';
+		$wfvals['test'] = '';
+		$wfvals['select_expressions'] = '[{"fieldname":"reltype","operation":"is","value":"getIDof(\'Accounts\',\'siccode\',\'doesnotexist\')","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = 'SELECT coalesce((SELECT vtiger_account.accountid FROM vtiger_account  INNER JOIN vtiger_crmentity ON vtiger_account.accountid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND ( vtiger_account.siccode = \'doesnotexist\')  AND vtiger_account.accountid > 0 limit 0, 1), 0) AS reltype FROM vtiger_potential  INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_potential.potentialid > 0';
 		$this->assertEquals($expected, $actual);
 	}
 

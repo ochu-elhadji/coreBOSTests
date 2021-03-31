@@ -672,6 +672,7 @@ class WSCreateTest extends TestCase {
 		$ObjectValues['saved_toid'] = '["julieta@yahoo.com","felix_hirpara@cox.net","lina@yahoo.com"]';
 		$ObjectValues['ccmail'] = '["noemail@domain.tld"]';
 		$ObjectValues['bccmail'] = '[""]';
+		$ObjectValues['replyto'] = 'noreply@tsolucio.com';
 		$ObjectValues['createdtime'] = $actual['createdtime'];
 		$ObjectValues['modifiedtime'] = $actual['modifiedtime'];
 		$ObjectValues['cbuuid'] = CRMEntity::getUUIDfromWSID($actual['id']);
@@ -723,7 +724,7 @@ class WSCreateTest extends TestCase {
 	 * @expectedException WebServiceException
 	 */
 	public function testCreateDocumentWithAttachment() {
-		global $current_user,$adb;
+		global $current_user, $site_URL;
 		$holduser = $current_user;
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(7); // testymd
@@ -772,7 +773,7 @@ class WSCreateTest extends TestCase {
 		$ObjectValues['_downloadurl'] = $actual['_downloadurl']; // 'http://localhost/coreBOSTest/storage/2020/June/week3/44181_Cron.png';
 		$filelocation = substr($actual['_downloadurl'], strpos($actual['_downloadurl'], 'storage'));
 		$docid = $actual['id'];
-		$this->assertRegExp('/^http.+coreBOSTest\/storage.+\/week[0-5]?\/[0-9]+_Cron.png$/', $actual['_downloadurl']);
+		$this->assertRegExp('/^'.str_replace('/', '\\/', $site_URL).'\/storage.+\/week[0-5]?\/[0-9]+_Cron.png$/', $actual['_downloadurl']);
 		$this->assertEquals($ObjectValues, $actual, 'Create Documents');
 		$sdoc = vtws_retrievedocattachment($actual['id'], true, $current_user);
 		$this->assertEquals($model_filename['content'], $sdoc[$actual['id']]['attachment'], 'Document Attachment');
@@ -977,6 +978,47 @@ class WSCreateTest extends TestCase {
 		$this->assertEquals('image/png; charset=binary', $shd['hdimageimageinfo']['type'], 'Create HelpDesk image');
 		$ObjectValues['hdimageimageinfo'] = $shd['hdimageimageinfo'];
 		$this->assertEquals($ObjectValues, $shd, 'Create HelpDesk');
+		///////////////////////////////////////////
+		///////////////////////////////////////////
+		// now we test with an Invalid/Insecure Image
+		try {
+			$filename = 'build/coreBOSTests/database/924495-agri90.png';
+			$mtype = finfo_file($finfo, $filename);
+			$model_filename = array(
+				'name'=>basename($filename),  // no slash nor paths in the name
+				'size'=>filesize($filename),
+				'type'=>$mtype,
+				'content'=>base64_encode(file_get_contents($filename))
+			);
+			$ObjectValues = array(
+				'assigned_user_id' => $cbUserID,
+				'created_user_id' => $cbUserID,
+				'modifiedby' => $cbUserID,
+				'attachments'=>array('hdimage' => $model_filename),
+				'ticket_title' => 'WS Create Test with insecure attachment',
+				'parent_id' => '11x74',
+				'product_id' => '14x2618',
+				//'ticketpriorities' => 'Urgent',  // test default picklist value
+				'ticketstatus' => 'Open',
+				'ticketseverities' => 'Major',
+				'hours' => '31.000000',
+				'ticketcategories' => 'Big Problem',
+				'days' => '3',
+				'from_portal' => '0',
+				'commentadded' => '',
+				'description' => 'Videamus animi partes, quarum est conspectus illustrior',
+				'solution' => '',
+			);
+			$_FILES=array();
+			unset(VTCacheUtils::$_fieldinfo_cache[13], VTCacheUtils::$_module_columnfields_cache[$Module]);
+			vtws_create($Module, $ObjectValues, $current_user);
+			$this->assertTrue(false);
+		} catch (WebServiceException $e) {
+			$this->assertEquals($e->code, WebServiceErrorCode::$VALIDATION_FAILED, 'Create HelpDesk insecure image exception');
+			$this->assertEquals($e->message, getTranslatedString('LBL_IMAGESECURITY_ERROR'), 'Create HelpDesk insecure image exception');
+		}
+		///////////////////////////////////////////
+		///////////////////////////////////////////
 		// now we have to test the delete block and field API
 		$fldhd = Vtiger_Field::getInstance('hdimage', $modhd);
 		$fldhd->delete(true);
@@ -1101,6 +1143,157 @@ class WSCreateTest extends TestCase {
 		$_FILES=array();
 		$actual = vtws_create($Module, $ObjectValues, $current_user);
 		/// end
+		$current_user = $holduser;
+	}
+
+	/**
+	 * Method testCreateExceptionWrongAsignedUserId
+	 * @test
+	 * @expectedException WebServiceException
+	 */
+	public function testCreateExceptionWrongAsignedUserId() {
+		global $current_user;
+		$Module = 'Project';
+		$cbUserID = '11x1084';
+		$ObjectValues = array(
+			'projectname'=>'Test WS Create',
+			'assigned_user_id' => $cbUserID
+		);
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode(WebServiceErrorCode::$REFERENCEINVALID);
+		vtws_create($Module, $ObjectValues, $current_user);
+	}
+
+	/**
+	 * Method testCreateInventoryModuleTaxTypeIndividual
+	 * @test
+	 */
+	public function testCreateInventoryModuleTaxTypeIndividual() {
+		global $current_user,$adb;
+		$holduser = $current_user;
+		$user = new Users();
+		$user->retrieveCurrentUserInfoFromFile(7); // testymd
+		$current_user = $user;
+		$Module = 'SalesOrder';
+		$cbUserID = '19x'.$current_user->id;
+		$ObjectValues = array(
+			'assigned_user_id' => $cbUserID,
+			'created_user_id' => $cbUserID,
+			'subject' => 'REST invoiceSubject',
+			'bill_city' => 'Drachten',
+			'bill_code' => '9205BB',
+			'bill_country' => 'Netherlands',
+			'bill_pobox' => '',
+			'bill_state' => 'áçèñtös',
+			'bill_street' => 'schuur 86',
+			'carrier' => '',
+			'contact_id' => '',
+			'conversion_rate' => '1.000',
+			'currency_id' => '21x1',
+			'customerno' => '',
+			'description' => 'Producten in deze verkooporder: 2 X Heart of David - songbook 2',
+			'duedate' => '2014-11-06',
+			'enable_recurring' => '0',
+			'end_period' => '',
+			'exciseduty' => '0.000',
+			'invoicestatus' => 'Approved',
+			'payment_duration' => '',
+			'pending' => '',
+			'potential_id' => '',
+			'vtiger_purchaseorder' => '',
+			'quote_id' => '',
+			'recurring_frequency' => '',
+			'salescommission' => '0.000',
+			'ship_city' => 'schuur 86',
+			'ship_code' => '9205BB',
+			'ship_country' => 'Netherlands',
+			'ship_pobox' => '',
+			'ship_state' => '',
+			'ship_street' => 'Drachten',
+			'account_id' => '11x174',
+			'sostatus' => 'Approved',
+			'start_period' => '',
+			'salesorder_no' => '',
+			'terms_conditions' => '',
+			'modifiedby' => $cbUserID,
+			'discount_type_final' => 'percentage',  //  zero/amount/percentage
+			'hdnDiscountAmount' => '20.000000',  // only used if 'discount_type_final' == 'amount'
+			'hdnDiscountPercent' => '10.000',  // only used if 'discount_type_final' == 'percentage'
+			'shipping_handling_charge' => 15,
+			'shtax1' => 0,   // apply this tax, MUST exist in the application with this internal taxname
+			'shtax2' => 8,   // apply this tax, MUST exist in the application with this internal taxname
+			'shtax3' => 0,   // apply this tax, MUST exist in the application with this internal taxname
+			'adjustmentType' => 'add',  //  none/add/deduct
+			'adjustment' => '40.000',
+			'taxtype' => 'individual',  // group or individual  taxes are obtained from the application
+			'invoiced' => 0,
+			'pdoInformation' => array(
+			  array(
+				"productid"=>2633,
+				"comment"=>'cmt1',
+				"qty"=>1,
+				"listprice"=>10,
+				'discount'=>0,  // 0 no discount, 1 discount
+				"discount_type"=>0,  //  amount/percentage
+				"discount_percentage"=>0,  // not needed nor used if type is amount
+				"discount_amount"=>0,  // not needed nor used if type is percentage
+			  ),
+			  array(
+				"productid"=>9752,
+				"qty"=>2,
+				"comment"=>'cmt2',
+				"listprice"=>10,
+				'discount'=>1,
+				"discount_type"=>'percentage',  //  amount/percentage
+				"discount_percentage"=>2,
+				"discount_amount"=>0
+			  ),
+			),
+		);
+		$_FILES=array();
+		$actual = vtws_create($Module, $ObjectValues, $current_user);
+		$ObjectValues['salesorder_no'] = $actual['salesorder_no'];
+		$ObjectValues['id'] = $actual['id'];
+		$ObjectValues['invoicestatus'] = '';
+		unset($ObjectValues['shtax1']);
+		unset($ObjectValues['shtax2']);
+		unset($ObjectValues['shtax3']);
+		unset($ObjectValues['adjustmentType']);
+		unset($ObjectValues['adjustment']);
+		unset($ObjectValues['taxtype']);
+		unset($ObjectValues['discount_type_final']);
+		unset($ObjectValues['shipping_handling_charge']);
+		unset($ObjectValues['pdoInformation']);
+		$ObjectValues['createdtime'] = $actual['createdtime'];
+		$ObjectValues['modifiedtime'] = $actual['modifiedtime'];
+		$ObjectValues['txtAdjustment'] = '40.000000';
+		$ObjectValues['hdnGrandTotal'] = '117.130000';
+		$ObjectValues['hdnSubTotal'] = '67.700000';
+		$ObjectValues['hdnTaxType'] = 'individual';
+		$ObjectValues['hdnS_H_Amount'] = '15.000000';
+		$ObjectValues['tandc'] = '';
+		$ObjectValues['pl_gross_total'] = '30.000000';
+		$ObjectValues['pl_dto_line'] = '0.400000';
+		$ObjectValues['pl_dto_total'] = '7.170000';
+		$ObjectValues['pl_dto_global'] = '6.770000';
+		$ObjectValues['pl_net_total'] = '22.830000';
+		$ObjectValues['sum_nettotal'] = '29.600000';
+		$ObjectValues['sum_taxtotal'] = '37.592000';
+		$ObjectValues['sum_tax1'] = '4.292000';
+		$ObjectValues['sum_taxtotalretention'] = '0.000000';
+		$ObjectValues['sum_tax2'] = '0.000000';
+		$ObjectValues['pl_sh_total'] = '15.000000';
+		$ObjectValues['sum_tax3'] = '33.300000';
+		$ObjectValues['pl_sh_tax'] = '1.200000';
+		$ObjectValues['pl_grand_total'] = '117.130000';
+		$ObjectValues['pl_adjustment'] = '40.000000';
+		$ObjectValues['cbuuid'] = CRMEntity::getUUIDfromWSID($actual['id']);
+		$this->assertEquals($ObjectValues, $actual, 'Create salesorder');
+		/// end
+		// undo workflow
+		$adb->pquery('update vtiger_service set website=? where serviceid=?', array('', 9752));
+		$adb->pquery('update vtiger_crmentity set modifiedby=1 where crmid=?', array(9752));
+		$adb->pquery('update vtiger_products set mfr_part_no=? where productid=?', array('', 2633));
 		$current_user = $holduser;
 	}
 }

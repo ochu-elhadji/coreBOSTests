@@ -101,7 +101,7 @@ class testgetentitynumwsmethod extends TestCase {
 				'glb-'
 			),
 			'InventoryDetails' => array(
-				'', 'InvDet-'
+				'InvDet-'
 			),
 			'Assets' => array(
 				'AST-'
@@ -148,14 +148,18 @@ class testgetentitynumwsmethod extends TestCase {
 			'cbPulse' => array(
 				'PL-'
 			),
-			'EtiquetasOO' => array(
-				'EtiquetasOO-'
-			),
 			'MsgTemplate' => array(
 				'MSGT-'
 			),
+			'cbCredentials' => array(
+				'CRED-'
+			),
 		));
 		$this->assertEquals($expected, vtws_get_entitynum($current_user));
+		$ruser = new Users();
+		$ruser->retrieveCurrentUserInfoFromFile(11); // nocreate
+		unset($expected[0]['cbTermConditions']);
+		$this->assertEquals($expected, vtws_get_entitynum($ruser));
 	}
 }
 ?>

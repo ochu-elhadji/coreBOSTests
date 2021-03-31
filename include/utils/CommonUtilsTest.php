@@ -1623,6 +1623,7 @@ $/', 'Lead QRCode name multiline mixed with legacy and workflow field references
 			'Messages' => 'Messages',
 			'cbPulse' => 'cbPulse',
 			'MsgTemplate' => 'MsgTemplate',
+			'cbCredentials' => 'cbCredentials',
 		);
 		return array(
 			array(array(), $e1),
@@ -1638,5 +1639,58 @@ $/', 'Lead QRCode name multiline mixed with legacy and workflow field references
 	 */
 	public function testgetSearchModulesCommon($filter, $expected) {
 		$this->assertEquals($expected, getSearchModulesCommon($filter));
+	}
+
+	/**
+	 * Method suppressAllButFirstProvider
+	 * params
+	 */
+	public function suppressAllButFirstProvider() {
+		return array(
+			array('', '', ''),
+			array('st', 'first one will stay only', 'first one will ay only'),
+			array('sta', 'first one will stay only stay', 'first one will stay only y'),
+			array('sta', 'first one will stastay only stay', 'first one will stay only y'),
+			array('s', 'first one will stastay only stay', 'first one will tatay only tay'),
+			array('s', 'firsst one will stastay only stay', 'first one will tatay only tay'),
+			array('%s', '%satstart', '%satstart'),
+			array('%s', '%satstart%s', '%satstart'),
+			array('%s', 'aa%satstart%s', 'aa%satstart'),
+			array('%s', 'aa%satstart%saa', 'aa%satstartaa'),
+			array('%s', 'aa%satstart%saa%sbb', 'aa%satstartaabb'),
+		);
+	}
+
+	/**
+	 * Method testsuppressAllButFirst
+	 * @test
+	 * @dataProvider suppressAllButFirstProvider
+	 */
+	public function testsuppressAllButFirst($occurence, $from, $expected) {
+		$this->assertEquals($expected, suppressAllButFirst($occurence, $from));
+	}
+
+	/**
+	 * Method testfetchCurrency
+	 * @test
+	 */
+	public function testfetchCurrency() {
+		global $adb;
+		$this->assertEquals(1, fetchCurrency(1));
+		$adb->query('update vtiger_users set currency_id=2 where id=1');
+		$this->assertEquals(1, fetchCurrency(1), 'cached value does not see the previous update');
+		$adb->query('update vtiger_users set currency_id=1 where id=1'); // leave it as it was
+		$this->assertEquals(2, fetchCurrency(12));
+	}
+
+	/**
+	 * Method testgetDenormalizedModules
+	 * @test
+	 */
+	public function testgetDenormalizedModules() {
+		$this->assertEquals(['vtiger_cbcredentials'], getDenormalizedModules());
+		$this->assertEquals(['vtiger_cbcredentials'], getDenormalizedModules('cbCredentials'));
+		$this->assertEquals([], getDenormalizedModules('DoesNotExist'));
+		$this->assertEquals([], getDenormalizedModules('Accounts'));
 	}
 }

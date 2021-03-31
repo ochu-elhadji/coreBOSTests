@@ -19,6 +19,8 @@
  *************************************************************************************************/
 use PHPUnit\Framework\TestCase;
 
+include_once 'include/Webservices/Delete.php';
+
 class WSReviseTest extends TestCase {
 
 	/****
@@ -117,12 +119,7 @@ class WSReviseTest extends TestCase {
 				'cbuuid' => '',
 			),
 			'portalpasswordtype' => '',
-			'portalloginuser' => '19x0',
-			'portalloginuserename' => array(
-				'module' => 'Users',
-				'reference' => '',
-				'cbuuid' => '',
-			),
+			'portalloginuser' => '',
 		);
 		$updateValues = array(
 			'otherphone' => '123456789',
@@ -307,6 +304,44 @@ class WSReviseTest extends TestCase {
 		$adb->pquery("update vtiger_products set productcode='', productsheet='', serialno='' where productid=?", array(2633));
 		/// end
 		$current_user = $holduser;
+	}
+
+	/**
+	 * Method testReviseDeletedRecord
+	 * @test
+	 */
+	public function testReviseDeletedRecord() {
+		global $current_user, $adb;
+		$adb->query('update vtiger_crmentity set deleted=0 where crmid=12836');
+		$adb->query('update vtiger_crmobject set deleted=0 where crmid=12836');
+		$quoteid = vtws_getEntityId('Quotes').'x12836';
+		$_REQUEST['action'] = 'QuotesAjax';
+		vtws_delete($quoteid, $current_user);
+		$updateValues = array(
+			'id' => $quoteid,
+			'subject'=>'Test WS Revise',
+		);
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode(WebServiceErrorCode::$ACCESSDENIED);
+		vtws_revise($updateValues, $current_user);
+	}
+
+	/**
+	 * Method testReviseExceptionWrongAsignedUserId
+	 * @test
+	 */
+	public function testReviseExceptionWrongAsignedUserId() {
+		global $current_user;
+		$cbUserID = '11x1084';
+		$projectID = '33x5989';
+		$updateValues = array(
+			'id' => $projectID,
+			'projectname'=>'Test WS Revise',
+			'assigned_user_id' => $cbUserID
+		);
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode(WebServiceErrorCode::$REFERENCEINVALID);
+		vtws_revise($updateValues, $current_user);
 	}
 }
 ?>

@@ -581,4 +581,575 @@ class testInventoryUtils extends TestCase {
 		$this->assertEquals('group', getInventoryTaxType('PurchaseOrder', 13378), 'PurchaseOrder group');
 		$this->assertEquals('', getInventoryTaxType('PurchaseOrder', 1), 'NotExist');
 	}
+
+	/**
+	 * Method testgetBaseConversionRateForProduct
+	 * @test
+	 */
+	public function testgetBaseConversionRateForProduct() {
+		global $current_user, $adb;
+		$hold_user = $current_user;
+		$user = new Users();
+		$user->retrieveCurrentUserInfoFromFile(12);
+		$current_user = $user;
+		$this->assertEquals(0.9090909090909091, getBaseConversionRateForProduct(2620, 'create', 'Products'));
+		$user = new Users();
+		$user->retrieveCurrentUserInfoFromFile(1);
+		$current_user = $user;
+		$this->assertEquals(1, getBaseConversionRateForProduct(2620, 'create', 'Products'));
+		$this->assertEquals(1, getBaseConversionRateForProduct(2620, 'edit', 'Products'));
+		$adb->query('update vtiger_products set currency_id=2 where productid=2620');
+		$this->assertEquals(0.9090909090909091, getBaseConversionRateForProduct(2620, 'edit', 'Products'));
+		$adb->query('update vtiger_products set currency_id=1 where productid=2620'); // leave it as it was
+		$this->assertEquals(1, getBaseConversionRateForProduct(9716, 'edit', 'Services'));
+		$this->assertEquals(1, getBaseConversionRateForProduct(9716, 'edit', 'Products'), 'this one triggers the empty conversion rate');
+		$current_user = $hold_user;
+	}
+
+	/**
+	 * Method getAllTaxesProvider
+	 */
+	public function getAllTaxesProvider() {
+		return array(
+			array(
+				'available',
+				'',
+				'',
+				'',
+				false,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'tax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'tax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'tax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+				),
+			),
+			array(
+				'all',
+				'',
+				'',
+				'',
+				false,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'tax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'tax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'tax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+				),
+			),
+			array(
+				'',
+				'',
+				'',
+				'',
+				false,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'tax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'tax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'tax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+				),
+			),
+			////////////////////
+			array(
+				'available',
+				'',
+				'',
+				'',
+				true,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'tax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'tax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+				),
+			),
+			array(
+				'all',
+				'',
+				'',
+				'',
+				true,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'tax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'tax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'tax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '1',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+				),
+			),
+			array(
+				'',
+				'',
+				'',
+				'',
+				true,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'tax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'tax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'tax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '1',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+				),
+			),
+			////////////////////
+			array(
+				'available',
+				'sh',
+				'',
+				'',
+				false,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'shtax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'shtax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'shtax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '0',
+					),
+				),
+			),
+			array(
+				'all',
+				'sh',
+				'',
+				'',
+				false,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'shtax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'shtax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'shtax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '0',
+					),
+				),
+			),
+			array(
+				'',
+				'sh',
+				'',
+				'',
+				false,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'shtax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'shtax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'shtax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '0',
+					),
+				),
+			),
+			////////////////////
+			array(
+				'available',
+				'sh',
+				'',
+				'',
+				true,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'shtax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'shtax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+					),
+				),
+			),
+			array(
+				'all',
+				'sh',
+				'',
+				'',
+				true,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'shtax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'shtax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'shtax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '1',
+					),
+				),
+			),
+			array(
+				'',
+				'sh',
+				'',
+				'',
+				true,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'shtax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'shtax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'shtax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '1',
+					),
+				),
+			),
+			////////////////////
+			array(
+				'available',
+				'',
+				'edit',
+				'11687',
+				false,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'tax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'tax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'tax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+				),
+			),
+			array(
+				'',
+				'',
+				'edit',
+				'11687',
+				false,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'tax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'tax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'tax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+				),
+			),
+			array(
+				'',
+				'',
+				'edit',
+				'11687',
+				true,
+				array(
+					array(
+						'taxid' => '1',
+						'taxname' => 'tax1',
+						'taxlabel' => 'VAT',
+						'percentage' => '4.500',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '2',
+						'taxname' => 'tax2',
+						'taxlabel' => 'Sales',
+						'percentage' => '10.000',
+						'deleted' => '0',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+					array(
+						'taxid' => '3',
+						'taxname' => 'tax3',
+						'taxlabel' => 'Service',
+						'percentage' => '12.500',
+						'deleted' => '1',
+						'retention' => '0',
+						'default' => '0',
+						'qcreate' => '0',
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Method testgetAllTaxes
+	 * @test
+	 * @dataProvider getAllTaxesProvider
+	 */
+	public function testgetAllTaxes($available, $sh, $mode, $id, $deactivateTax3, $expected) {
+		global $adb;
+		if ($deactivateTax3) {
+			if ($sh == 'sh') {
+				$tablename = 'vtiger_shippingtaxinfo';
+			} else {
+				$tablename = 'vtiger_inventorytaxinfo';
+			}
+			$adb->query('update '.$tablename.' set deleted=1 where taxid=3');
+		}
+		$this->assertEquals($expected, getAllTaxes($available, $sh, $mode, $id));
+		if ($deactivateTax3) {
+			$adb->query('update '.$tablename.' set deleted=0 where taxid=3');
+		}
+	}
 }

@@ -68,6 +68,8 @@ class testCustomerPortalWS extends TestCase {
 			'currency_decimal_separator' => '.',
 			'currency_grouping_separator' => ',',
 			'currency_symbol_placement' => '$1.0',
+			'roleid' => 'H2',
+			'rolename' => 'CEO',
 		);
 		$this->assertEquals($expected, vtws_getPortalUserInfo($user), 'vtws_getPortalUserInfo admin');
 		$user = new Users();
@@ -84,6 +86,8 @@ class testCustomerPortalWS extends TestCase {
 			'currency_decimal_separator' => '.',
 			'currency_grouping_separator' => ',',
 			'currency_symbol_placement' => '$1.0',
+			'roleid' => 'H3',
+			'rolename' => 'Vice President',
 		);
 		$this->assertEquals($expected, vtws_getPortalUserInfo($user), 'vtws_getPortalUserInfo testdmy');
 		$user = new Users();
@@ -100,6 +104,8 @@ class testCustomerPortalWS extends TestCase {
 			'currency_decimal_separator' => ',',
 			'currency_grouping_separator' => '.',
 			'currency_symbol_placement' => '$1.0',
+			'roleid' => 'H3',
+			'rolename' => 'Vice President',
 		);
 		$this->assertEquals($expected, vtws_getPortalUserInfo($user), 'vtws_getPortalUserInfo testdmy');
 	}
@@ -112,17 +118,18 @@ class testCustomerPortalWS extends TestCase {
 		$usersadmin = '[{"userid":"19x1","username":"Administrator"},{"userid":"19x11","username":"nocreate cbTest"},{"userid":"19x5","username":"cbTest testdmy"},{"userid":"19x8","username":"cbTest testes"},{"userid":"19x12","username":"cbTest testmcurrency"},{"userid":"19x6","username":"cbTest testmdy"},{"userid":"19x10","username":"cbTest testtz"},{"userid":"19x13","username":"cbTest testtz-3"},{"userid":"19x7","username":"cbTest testymd"}]';
 		return array(
 			array('HelpDesk', 1, $usersadmin),
-			array('DoesNotExist', 1, $usersadmin),
-			array('', 1, $usersadmin),
+			array('DoesNotExist', 1, '[]'),
+			array('', 1, '[]'),
 			array('HelpDesk', $this->usrdota0x, $usersadmin),
-			array('DoesNotExist', $this->usrdota0x, $usersadmin),
-			array('', $this->usrdota0x, $usersadmin),
+			array('DoesNotExist', $this->usrdota0x, '[]'),
+			array('', $this->usrdota0x, '[]'),
 			array('HelpDesk', $this->usrinactive, $usersadmin),
-			array('DoesNotExist', $this->usrinactive, $usersadmin),
-			array('', $this->usrinactive, $usersadmin),
+			array('DoesNotExist', $this->usrinactive, '[]'),
+			array('', $this->usrinactive, '[]'),
 			array('HelpDesk', $this->usrnocreate, $usersadmin),
-			array('DoesNotExist', $this->usrnocreate, $usersadmin),
-			array('', $this->usrnocreate, $usersadmin),
+			array('cbTermConditions', $this->usrnocreate, '[]'),
+			array('DoesNotExist', $this->usrnocreate, '[]'),
+			array('', $this->usrnocreate, '[]'),
 		);
 	}
 
@@ -145,17 +152,18 @@ class testCustomerPortalWS extends TestCase {
 		$usersadmin = '[{"groupid":"20x3","groupname":"Marketing Group"},{"groupid":"20x4","groupname":"Support Group"},{"groupid":"20x2","groupname":"Team Selling"}]';
 		return array(
 			array('HelpDesk', 1, $usersadmin),
-			array('DoesNotExist', 1, $usersadmin),
-			array('', 1, $usersadmin),
+			array('DoesNotExist', 1, '[]'),
+			array('', 1, '[]'),
 			array('HelpDesk', $this->usrdota0x, $usersadmin),
-			array('DoesNotExist', $this->usrdota0x, $usersadmin),
-			array('', $this->usrdota0x, $usersadmin),
+			array('DoesNotExist', $this->usrdota0x, '[]'),
+			array('', $this->usrdota0x, '[]'),
 			array('HelpDesk', $this->usrinactive, $usersadmin),
-			array('DoesNotExist', $this->usrinactive, $usersadmin),
-			array('', $this->usrinactive, $usersadmin),
+			array('DoesNotExist', $this->usrinactive, '[]'),
+			array('', $this->usrinactive, '[]'),
 			array('HelpDesk', $this->usrnocreate, $usersadmin),
-			array('DoesNotExist', $this->usrnocreate, $usersadmin),
-			array('', $this->usrnocreate, $usersadmin),
+			array('cbTermConditions', $this->usrnocreate, '[]'),
+			array('DoesNotExist', $this->usrnocreate, '[]'),
+			array('', $this->usrnocreate, '[]'),
 		);
 	}
 
@@ -239,19 +247,31 @@ class testCustomerPortalWS extends TestCase {
 		$this->assertEquals('12x1085', vtws_AuthenticateContact('julieta@yahoo.com', '5ub1ipv3'), 'AuthenticateContact OK');
 		$this->assertFalse(vtws_AuthenticateContact('julieta@yahoo.com', 's'), 'AuthenticateContact incorrect password');
 		$this->assertFalse(vtws_AuthenticateContact("hackit'; select 1;", '5ub1ipv3'), 'AuthenticateContact incorrect user');
-		vtws_changePortalUserPassword('julieta@yahoo.com', '$newPass');
+		vtws_changePortalUserPassword('julieta@yahoo.com', '$newPass', '5ub1ipv3');
 		$this->assertFalse(vtws_AuthenticateContact('julieta@yahoo.com', '5ub1ipv3'), 'AuthenticateContact NOK');
 		$this->assertEquals('12x1085', vtws_AuthenticateContact('julieta@yahoo.com', '$newPass'), 'AuthenticateContact OK');
-		vtws_changePortalUserPassword('julieta@yahoo.com', '5ub1ipv3');
+		vtws_changePortalUserPassword('julieta@yahoo.com', '5ub1ipv3', '$newPass');
 		$this->assertEquals('12x1085', vtws_AuthenticateContact('julieta@yahoo.com', '5ub1ipv3'), 'AuthenticateContact OK');
 	}
 
 	/**
 	 * Method testchangePortalUserPassword
 	 * @test
+	 * @expectedException WebServiceException
 	 */
 	public function testchangePortalUserPassword() {
-		$this->assertFalse(vtws_changePortalUserPassword("hackit'; select 1;", '$newPass'), 'changePortalUserPassword NOK');
+		$this->expectException(WebServiceException::class);
+		vtws_changePortalUserPassword("hackit'; select 1;", '$newPass', '5ub1ipv3');
+	}
+
+	/**
+	 * Method testchangePortalUserPasswordWrongOldPassword
+	 * @test
+	 * @expectedException WebServiceException
+	 */
+	public function testchangePortalUserPasswordWrongOldPassword() {
+		$this->expectException(WebServiceException::class);
+		vtws_changePortalUserPassword('julieta@yahoo.com', '$newPass', 'notoldpassword');
 	}
 
 	/**
@@ -429,20 +449,110 @@ class testCustomerPortalWS extends TestCase {
 		$accountId = '74';
 		$contactId = '1084';
 		return array(
-			array('Contacts', '74', '1084', "vtiger_contactdetails.accountid=$accountId"),
-			array('Accounts', '74', '1084', "vtiger_account.accountid=$accountId"),
-			array('Quotes', '74', '1084', "vtiger_quotes.accountid=$accountId or vtiger_quotes.contactid=$contactId"),
-			array('SalesOrder', '74', '1084', "vtiger_salesorder.accountid=$accountId or vtiger_salesorder.contactid=$contactId"),
-			array('ServiceContracts', '74', '1084', "vtiger_servicecontracts.sc_related_to=$accountId or vtiger_servicecontracts.sc_related_to=$contactId"),
-			array('Invoice', '74', '1084', "vtiger_invoice.accountid=$accountId or vtiger_invoice.contactid=$contactId"),
-			array('HelpDesk', '74', '1084', "vtiger_troubletickets.parent_id=$accountId or vtiger_troubletickets.parent_id=$contactId"),
-			array('Assets', '74', '1084', "vtiger_assets.account=$accountId"),
-			array('Project', '74', '1084', "vtiger_project.linktoaccountscontacts=$accountId or vtiger_project.linktoaccountscontacts=$contactId"),
-			array('Products', '74', '1084', ''),
-			array('Services', '74', '1084', ''),
-			array('Faq', '74', '1084', "faqstatus='Published'"),
-			array('Documents', '74', '1084', ''),
-			array('AnythingElse', '74', '1084', ''),
+			array('Contacts', '', '1084', 0, "(vtiger_contactdetails.accountid=-1 or vtiger_contactdetails.contactid=1084)"),
+			array('Accounts', '', '1084', 0, "vtiger_account.accountid=-1"),
+			array('AnythingElse', '', '1084', 0, ''),
+			////////////////
+			array('Contacts', '74', '1084', 0, "(vtiger_contactdetails.accountid=$accountId or vtiger_contactdetails.contactid=1084)"),
+			array('Accounts', '74', '1084', 0, "vtiger_account.accountid=$accountId"),
+			array('Quotes', '74', '1084', 0, "vtiger_quotes.accountid=$accountId or vtiger_quotes.contactid=$contactId"),
+			array('SalesOrder', '74', '1084', 0, "vtiger_salesorder.accountid=$accountId or vtiger_salesorder.contactid=$contactId"),
+			array('ServiceContracts', '74', '1084', 0, "vtiger_servicecontracts.sc_related_to=$accountId or vtiger_servicecontracts.sc_related_to=$contactId"),
+			array('Invoice', '74', '1084', 0, "vtiger_invoice.accountid=$accountId or vtiger_invoice.contactid=$contactId"),
+			array('HelpDesk', '74', '1084', 0, "vtiger_troubletickets.parent_id=$accountId or vtiger_troubletickets.parent_id=$contactId"),
+			array('Assets', '74', '1084', 0, "vtiger_assets.account=$accountId"),
+			array('Project', '74', '1084', 0, "vtiger_project.linktoaccountscontacts=$accountId or vtiger_project.linktoaccountscontacts=$contactId"),
+			array('Products', '74', '1084', 0, ''),
+			array('Services', '74', '1084', 0, ''),
+			array('Faq', '74', '1084', 0, "faqstatus='Published'"),
+			array('Documents', '74', '1084', 0, array(
+				'clause' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid and vtiger_senotesrel.crmid IN (74,1084)',
+				'noconditions' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid',
+			)),
+			array('Potentials', '74', '1084', 0, 'vtiger_potential.related_to=74 or vtiger_potential.related_to=1084'),
+			array('CobroPago', '74', '1084', 0, 'vtiger_cobropago.parent_id=74 or vtiger_cobropago.parent_id=1084'),
+			array('AnythingElse', '74', '1084', 0, ''),
+			////////////////
+			array('Contacts', '74', '1084', 1, "(vtiger_contactdetails.accountid=$accountId or vtiger_contactdetails.contactid IN (1084,1086,1088,1090,1092,1094))"),
+			array('Accounts', '74', '1084', 1, "vtiger_account.accountid=$accountId"),
+			array('Quotes', '74', '1084', 1, "vtiger_quotes.accountid=$accountId or vtiger_quotes.contactid IN (1084,1086,1088,1090,1092,1094)"),
+			array('SalesOrder', '74', '1084', 1, "vtiger_salesorder.accountid=$accountId or vtiger_salesorder.contactid IN (1084,1086,1088,1090,1092,1094)"),
+			array('ServiceContracts', '74', '1084', 1, "vtiger_servicecontracts.sc_related_to=$accountId or vtiger_servicecontracts.sc_related_to IN (1084,1086,1088,1090,1092,1094)"),
+			array('Invoice', '74', '1084', 1, "vtiger_invoice.accountid=$accountId or vtiger_invoice.contactid IN (1084,1086,1088,1090,1092,1094)"),
+			array('HelpDesk', '74', '1084', 1, "vtiger_troubletickets.parent_id=$accountId or vtiger_troubletickets.parent_id IN (1084,1086,1088,1090,1092,1094)"),
+			array('Assets', '74', '1084', 1, "vtiger_assets.account=$accountId"),
+			array('Project', '74', '1084', 1, "vtiger_project.linktoaccountscontacts=$accountId or vtiger_project.linktoaccountscontacts IN (1084,1086,1088,1090,1092,1094)"),
+			array('Products', '74', '1084', 1, ''),
+			array('Services', '74', '1084', 1, ''),
+			array('Faq', '74', '1084', 1, "faqstatus='Published'"),
+			array('Documents', '74', '1084', 1, array(
+				'clause' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid and vtiger_senotesrel.crmid IN (74,1084,1086,1088,1090,1092,1094)',
+				'noconditions' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid',
+			)),
+			array('Potentials', '74', '1084', 1, "vtiger_potential.related_to=74 or vtiger_potential.related_to IN (1084,1086,1088,1090,1092,1094)"),
+			array('CobroPago', '74', '1084', 1, "vtiger_cobropago.parent_id=74 or vtiger_cobropago.parent_id IN (1084,1086,1088,1090,1092,1094)"),
+			array('AnythingElse', '74', '1084', 1, ''),
+			////////////////
+			array('Contacts', '74', '1084', 2, "(vtiger_contactdetails.accountid IN (74,746) or vtiger_contactdetails.contactid IN (1084,1086,1088,1090,1092,1094))"),
+			array('Accounts', '74', '1084', 2, "vtiger_account.accountid IN (74,746)"),
+			array('Quotes', '74', '1084', 2, "vtiger_quotes.accountid IN (74,746) or vtiger_quotes.contactid IN (1084,1086,1088,1090,1092,1094)"),
+			array('SalesOrder', '74', '1084', 2, "vtiger_salesorder.accountid IN (74,746) or vtiger_salesorder.contactid IN (1084,1086,1088,1090,1092,1094)"),
+			array('ServiceContracts', '74', '1084', 2, "vtiger_servicecontracts.sc_related_to IN (74,746) or vtiger_servicecontracts.sc_related_to IN (1084,1086,1088,1090,1092,1094)"),
+			array('Invoice', '74', '1084', 2, "vtiger_invoice.accountid IN (74,746) or vtiger_invoice.contactid IN (1084,1086,1088,1090,1092,1094)"),
+			array('HelpDesk', '74', '1084', 2, "vtiger_troubletickets.parent_id IN (74,746) or vtiger_troubletickets.parent_id IN (1084,1086,1088,1090,1092,1094)"),
+			array('Assets', '74', '1084', 2, "vtiger_assets.account IN (74,746)"),
+			array('Project', '74', '1084', 2, "vtiger_project.linktoaccountscontacts IN (74,746) or vtiger_project.linktoaccountscontacts IN (1084,1086,1088,1090,1092,1094)"),
+			array('Products', '74', '1084', 2, ''),
+			array('Services', '74', '1084', 2, ''),
+			array('Faq', '74', '1084', 2, "faqstatus='Published'"),
+			array('Documents', '74', '1084', 2, array(
+				'clause' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid and vtiger_senotesrel.crmid IN (74,746,1084,1086,1088,1090,1092,1094)',
+				'noconditions' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid',
+			)),
+			array('Potentials', '74', '1084', 2, "vtiger_potential.related_to IN (74,746) or vtiger_potential.related_to IN (1084,1086,1088,1090,1092,1094)"),
+			array('CobroPago', '74', '1084', 2, "vtiger_cobropago.parent_id IN (74,746) or vtiger_cobropago.parent_id IN (1084,1086,1088,1090,1092,1094)"),
+			array('AnythingElse', '74', '1084', 2, ''),
+			////////////////
+			array('Contacts', '74', '1084', 3, "(vtiger_contactdetails.accountid IN (74,746) or vtiger_contactdetails.contactid IN (1084,1086,1088,1090,1092,1094))"),
+			array('Accounts', '74', '1084', 3, "vtiger_account.accountid IN (74,746)"),
+			array('Quotes', '74', '1084', 3, "vtiger_quotes.accountid IN (74,746) or vtiger_quotes.contactid IN (1084,1086,1088,1090,1092,1094)"),
+			array('SalesOrder', '74', '1084', 3, "vtiger_salesorder.accountid IN (74,746) or vtiger_salesorder.contactid IN (1084,1086,1088,1090,1092,1094)"),
+			array('ServiceContracts', '74', '1084', 3, "vtiger_servicecontracts.sc_related_to IN (74,746) or vtiger_servicecontracts.sc_related_to IN (1084,1086,1088,1090,1092,1094)"),
+			array('Invoice', '74', '1084', 3, "vtiger_invoice.accountid IN (74,746) or vtiger_invoice.contactid IN (1084,1086,1088,1090,1092,1094)"),
+			array('HelpDesk', '74', '1084', 3, "vtiger_troubletickets.parent_id IN (74,746) or vtiger_troubletickets.parent_id IN (1084,1086,1088,1090,1092,1094)"),
+			array('Assets', '74', '1084', 3, "vtiger_assets.account IN (74,746)"),
+			array('Project', '74', '1084', 3, "vtiger_project.linktoaccountscontacts IN (74,746) or vtiger_project.linktoaccountscontacts IN (1084,1086,1088,1090,1092,1094)"),
+			array('Products', '74', '1084', 3, ''),
+			array('Services', '74', '1084', 3, ''),
+			array('Faq', '74', '1084', 3, "faqstatus='Published'"),
+			array('Documents', '74', '1084', 3, array(
+				'clause' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid and vtiger_senotesrel.crmid IN (74,746,1084,1086,1088,1090,1092,1094)',
+				'noconditions' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid',
+			)),
+			array('Potentials', '74', '1084', 3, "vtiger_potential.related_to IN (74,746) or vtiger_potential.related_to IN (1084,1086,1088,1090,1092,1094)"),
+			array('CobroPago', '74', '1084', 3, "vtiger_cobropago.parent_id IN (74,746) or vtiger_cobropago.parent_id IN (1084,1086,1088,1090,1092,1094)"),
+			array('AnythingElse', '74', '1084', 3, ''),
+			////////////////
+			array('Contacts', '74', '1084', 4, "(vtiger_contactdetails.accountid IN (74,746) or vtiger_contactdetails.contactid IN (1084,1086,1088,1090,1092,1094,1829))"),
+			array('Accounts', '74', '1084', 4, "vtiger_account.accountid IN (74,746)"),
+			array('Quotes', '74', '1084', 4, "vtiger_quotes.accountid IN (74,746) or vtiger_quotes.contactid IN (1084,1086,1088,1090,1092,1094,1829)"),
+			array('SalesOrder', '74', '1084', 4, "vtiger_salesorder.accountid IN (74,746) or vtiger_salesorder.contactid IN (1084,1086,1088,1090,1092,1094,1829)"),
+			array('ServiceContracts', '74', '1084', 4, "vtiger_servicecontracts.sc_related_to IN (74,746) or vtiger_servicecontracts.sc_related_to IN (1084,1086,1088,1090,1092,1094,1829)"),
+			array('Invoice', '74', '1084', 4, "vtiger_invoice.accountid IN (74,746) or vtiger_invoice.contactid IN (1084,1086,1088,1090,1092,1094,1829)"),
+			array('HelpDesk', '74', '1084', 4, "vtiger_troubletickets.parent_id IN (74,746) or vtiger_troubletickets.parent_id IN (1084,1086,1088,1090,1092,1094,1829)"),
+			array('Assets', '74', '1084', 4, "vtiger_assets.account IN (74,746)"),
+			array('Project', '74', '1084', 4, "vtiger_project.linktoaccountscontacts IN (74,746) or vtiger_project.linktoaccountscontacts IN (1084,1086,1088,1090,1092,1094,1829)"),
+			array('Products', '74', '1084', 4, ''),
+			array('Services', '74', '1084', 4, ''),
+			array('Faq', '74', '1084', 4, "faqstatus='Published'"),
+			array('Documents', '74', '1084', 4, array(
+				'clause' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid and vtiger_senotesrel.crmid IN (74,746,1084,1086,1088,1090,1092,1094,1829)',
+				'noconditions' => ' inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid',
+			)),
+			array('Potentials', '74', '1084', 4, "vtiger_potential.related_to IN (74,746) or vtiger_potential.related_to IN (1084,1086,1088,1090,1092,1094,1829)"),
+			array('CobroPago', '74', '1084', 4, "vtiger_cobropago.parent_id IN (74,746) or vtiger_cobropago.parent_id IN (1084,1086,1088,1090,1092,1094,1829)"),
+			array('AnythingElse', '74', '1084', 4, ''),
+			////////////////
 		);
 	}
 
@@ -451,8 +561,8 @@ class testCustomerPortalWS extends TestCase {
 	 * @test
 	 * @dataProvider PortalModuleRestrictionsProvider
 	 */
-	public function testPortalModuleRestrictions($module, $accountId, $contactId, $expected) {
-		$this->assertEquals($expected, evvt_PortalModuleRestrictions($module, $accountId, $contactId));
+	public function testPortalModuleRestrictions($module, $accountId, $contactId, $companyAccess, $expected) {
+		$this->assertEquals($expected, evvt_PortalModuleRestrictions($module, $accountId, $contactId, $companyAccess));
 	}
 
 	/**
@@ -531,7 +641,7 @@ class testCustomerPortalWS extends TestCase {
 		global $current_user;
 		$current_user = Users::getActiveAdminUser();
 		$actual = cbwsgetSearchResults('che', '', array('userId' => '19x1', 'accountId' => '11x74', 'contactId' => '12x1084'), $current_user);
-		$this->assertGreaterThan(600, count($actual));
+		$this->assertGreaterThan(100, count($actual));
 		$actual1 = cbwsgetSearchResults('che', '', array('userId' => '19x1', 'accountId' => '11x74', 'contactId' => '12x1084', 'limit' => 50), $current_user);
 		$this->assertEquals(50, count($actual1));
 		$actual2 = cbwsgetSearchResults('che', '', array('userId' => '19x1', 'accountId' => '11x74', 'contactId' => '12x1084', 'limit' => 50), $current_user);
@@ -630,6 +740,99 @@ class testCustomerPortalWS extends TestCase {
 		$this->assertEquals($eaccpdouser5, $actual);
 		$actual = cbwsgetSearchResultsWithTotals('che', 'Documents', array('userId' => '19x5', 'accountId' => '11x74', 'contactId' => '12x1084'), $current_user);
 		$this->assertEquals($edocs, $actual);
+	}
+
+	/**
+	 * Method getFieldAutocompleteProvider
+	 * params
+	 */
+	public function getFieldAutocompleteProvider() {
+		$admin = Users::getActiveAdminUser();
+		$ruser = new Users();
+		$ruser->retrieveCurrentUserInfoFromFile($this->usrnocreate);
+		$ea1 = array(
+			array('crmid' => '11x74', 'crmfields' => array('accountname' => 'Chemex Labs Ltd')),
+			array('crmid' => '11x148', 'crmfields' => array('accountname' => 'Deloitte & Touche')),
+			array('crmid' => '11x235', 'crmfields' => array('accountname' => 'Cheek, John D Esq')),
+			array('crmid' => '11x352', 'crmfields' => array('accountname' => 'Orourke, Denise Michelle Esq')),
+			array('crmid' => '11x427', 'crmfields' => array('accountname' => 'Cheyenne Business Equipment')),
+		);
+		$ea2 = array(
+			array('crmid' => '11x74', 'crmfields' => array('accountname' => 'Chemex Labs Ltd')),
+			array('crmid' => '11x75', 'crmfields' => array('accountname' => 'Atrium Marketing Inc')),
+			array('crmid' => '11x76', 'crmfields' => array('accountname' => 'American Speedy Printing Ctrs')),
+			array('crmid' => '11x77', 'crmfields' => array('accountname' => 'Sherpa Corp')),
+		);
+		$ec1 = array(
+			array('crmid' => '12x1084', 'crmfields' => array('firstname' => 'Lina', 'lastname' => 'Schwiebert')),
+			array('crmid' => '12x1630', 'crmfields' => array('firstname' => 'Maile', 'lastname' => 'Linahan')),
+		);
+		$ec2 = array(
+			array('crmid' => '12x1084', 'crmfields' => array('lastname' => 'Schwiebert')),
+			array('crmid' => '12x1630', 'crmfields' => array('lastname' => 'Linahan')),
+		);
+		$eh1 = array(
+			array('crmid' => '17x2636', 'crmfields' => array('ticket_title' => 'Problem about cannot hear your salesperson on asterix calls')),
+			array('crmid' => '17x2640', 'crmfields' => array('ticket_title' => 'Problem about product quality not as expected')),
+		);
+		return array(
+			array('', '', '', '', '', '', $admin, array()),
+			array('', '', 'Accounts', '', '', '', $admin, array()),
+			array('', '', 'SMSNotifier', '', '', '', $admin, array()),
+			array('', '', 'AnythingElse', '', '', '', $admin, array()),
+			array('', '', 'cbTermConditions', 'reference', '', '', $ruser, array()),
+			array('che', 'contains', 'Accounts', 'accountname', '', 5, $admin, $ea1),
+			array('', '', 'Accounts', 'accountname', '', 4, $admin, $ea2),
+			array('che', 'eq', 'Accounts', 'accountname', '', 4, $admin, array()),
+			array('lina', 'startswith', 'Contacts', 'firstname,lastname', '', 4, $admin, $ec1),
+			array('lina', 'startswith', 'Contacts', 'firstname,lastname', 'lastname', 0, $admin, $ec2),
+			array('lina Schwie', 'startswith', 'Contacts', 'firstname,lastname', '', 4, $admin, array()),
+			array('Problem', 'contains', 'HelpDesk', 'ticket_title', '', 2, $admin, $eh1),
+		);
+	}
+
+	/**
+	 * Method testgetFieldAutocomplete
+	 * @test
+	 * @dataProvider getFieldAutocompleteProvider
+	 */
+	public function testgetFieldAutocomplete($term, $filter, $searchinmodule, $fields, $returnfields, $limit, $user, $expected) {
+		$this->assertEquals($expected, getFieldAutocomplete($term, $filter, $searchinmodule, $fields, $returnfields, $limit, $user));
+	}
+
+	/**
+	 * Method getFieldAutocompleteQueryProvider
+	 * params
+	 */
+	public function getFieldAutocompleteQueryProvider() {
+		$admin = Users::getActiveAdminUser();
+		$ruser = new Users();
+		$ruser->retrieveCurrentUserInfoFromFile($this->usrnocreate);
+		$ea1 = "SELECT vtiger_account.accountname, vtiger_account.accountid FROM vtiger_account  INNER JOIN vtiger_crmentity ON vtiger_account.accountid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (( vtiger_account.accountname LIKE '%che%') ) AND vtiger_account.accountid > 0 limit 0, 5";
+		$ea2 = "SELECT vtiger_account.accountname, vtiger_account.accountid FROM vtiger_account  INNER JOIN vtiger_crmentity ON vtiger_account.accountid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (( vtiger_account.accountname LIKE '%%%') ) AND vtiger_account.accountid > 0 limit 0, 4";
+		$ea3 = "SELECT vtiger_account.accountname, vtiger_account.accountid FROM vtiger_account  INNER JOIN vtiger_crmentity ON vtiger_account.accountid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (( vtiger_account.accountname = 'che') ) AND vtiger_account.accountid > 0 limit 0, 4";
+		$ec1 = "SELECT vtiger_contactdetails.firstname, vtiger_contactdetails.lastname, vtiger_contactdetails.contactid FROM vtiger_contactdetails  INNER JOIN vtiger_crmentity ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (( vtiger_contactdetails.firstname LIKE 'lina%')  OR ( vtiger_contactdetails.lastname LIKE 'lina%') ) AND vtiger_contactdetails.contactid > 0 limit 0, 4";
+		$ec2 = "SELECT vtiger_contactdetails.lastname, vtiger_contactdetails.firstname, vtiger_contactdetails.contactid FROM vtiger_contactdetails  INNER JOIN vtiger_crmentity ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (( vtiger_contactdetails.firstname LIKE 'lina%')  OR ( vtiger_contactdetails.lastname LIKE 'lina%') ) AND vtiger_contactdetails.contactid > 0 limit 0, 30";
+		$ec3 = "SELECT vtiger_contactdetails.firstname, vtiger_contactdetails.lastname, vtiger_contactdetails.contactid FROM vtiger_contactdetails  INNER JOIN vtiger_crmentity ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (( vtiger_contactdetails.firstname LIKE 'lina Schwie%')  OR ( vtiger_contactdetails.lastname LIKE 'lina Schwie%') ) AND vtiger_contactdetails.contactid > 0 limit 0, 4";
+		$eh1 = "SELECT vtiger_troubletickets.title, vtiger_troubletickets.ticketid FROM vtiger_troubletickets  INNER JOIN vtiger_crmentity ON vtiger_troubletickets.ticketid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (( vtiger_troubletickets.title LIKE '%Problem%') ) AND vtiger_troubletickets.ticketid > 0 limit 0, 2";
+		return array(
+			array('che', 'contains', 'Accounts', 'accountname', '', 5, $admin, $ea1),
+			array('', '', 'Accounts', 'accountname', '', 4, $admin, $ea2),
+			array('che', 'eq', 'Accounts', 'accountname', '', 4, $admin, $ea3),
+			array('lina', 'startswith', 'Contacts', 'firstname,lastname', '', 4, $admin, $ec1),
+			array('lina', 'startswith', 'Contacts', 'firstname,lastname', 'lastname', 0, $admin, $ec2),
+			array('lina Schwie', 'startswith', 'Contacts', 'firstname,lastname', '', 4, $admin, $ec3),
+			array('Problem', 'contains', 'HelpDesk', 'ticket_title', '', 2, $admin, $eh1),
+		);
+	}
+
+	/**
+	 * Method testgetFieldAutocompleteQuery
+	 * @test
+	 * @dataProvider getFieldAutocompleteQueryProvider
+	 */
+	public function testgetFieldAutocompleteQuery($term, $filter, $searchinmodule, $fields, $returnfields, $limit, $user, $expected) {
+		$this->assertEquals($expected, getFieldAutocompleteQuery($term, $filter, $searchinmodule, $fields, $returnfields, $limit, $user));
 	}
 }
 ?>

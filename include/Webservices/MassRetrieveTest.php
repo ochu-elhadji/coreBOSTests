@@ -651,12 +651,7 @@ class testWSMassRetrieve extends TestCase {
 				'othercountry' => '',
 				'imagename' => '',
 				'portalpasswordtype' => '',
-				'portalloginuser' => '19x',
-				'portalloginuserename' => array(
-					'module' => 'Users',
-					'reference' => '',
-					'cbuuid' => '',
-				),
+				'portalloginuser' => '',
 			),
 		);
 		// junk in > junk out
@@ -716,6 +711,7 @@ class testWSMassRetrieve extends TestCase {
 						'cbuuid' => '2d0df24c242d41bb5113a0ee7e9a420ba08c98b7',
 					),
 				),
+				'replyto' => '',
 			),
 			'16x26207' => array(
 				'id' => '16x26207',
@@ -762,6 +758,7 @@ class testWSMassRetrieve extends TestCase {
 						'cbuuid' => 'a5e0d1b386c2b7acbc33e86ff05b80dd39a932db',
 					),
 				),
+				'replyto' => '',
 			),
 		);
 		$this->assertEquals($expected, $actual, 'MassRetrieve Emails');
