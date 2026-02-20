@@ -20,7 +20,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-class testCommonUtils extends TestCase {
+class CommonUtilsTest extends TestCase {
 
 	/****
 	 * TEST Users
@@ -33,6 +33,49 @@ class testCommonUtils extends TestCase {
 		'usrnocreate' => 11,
 		'usrtestmcurrency' => 12
 	);
+
+	/**
+	 * Method isAdminProvider
+	 * params
+	 */
+	public function isAdminProvider() {
+		return array(
+			[1, true],
+			[5, false],
+			[6, false],
+			[7, false],
+			[10, false],
+			[11, false],
+			[12, false],
+			[0, false],
+			[-12, false],
+			['', false],
+		);
+	}
+
+	/**
+	 * Method testisAdmin
+	 * @test
+	 * @dataProvider isAdminProvider
+	 */
+	public function testisAdmin($userid, $expected) {
+		if (!empty($userid) && $userid>0) {
+			$user = new Users();
+			$user->retrieveCurrentUserInfoFromFile($userid);
+		} else {
+			$user = $userid;
+		}
+		$this->assertEquals($expected, is_admin($user), 'isAdmin '.$userid);
+	}
+
+	/**
+	 * Method testisAdminID
+	 * @test
+	 * @dataProvider isAdminProvider
+	 */
+	public function testisAdminID($userid, $expected) {
+		$this->assertEquals($expected, is_adminID($userid), 'is_adminID '.$userid);
+	}
 
 	/**
 	 * Method testgetCurrencyName
@@ -102,7 +145,7 @@ class testCommonUtils extends TestCase {
 		  'search' => 'true',
 		);
 		$actual = getBasic_Advance_SearchURL();
-		$expected = '&query=true&searchtype=BasicSearch&search_field=firstname&search_text=lina';
+		$expected = '&query=true&searchtype=BasicSearch&search_field=firstname&search_text=lina&type=';
 		$this->assertEquals($expected, $actual, 'getBasic_Advance_SearchURL 2');
 		$_REQUEST = array(
 		  'search_field' => 'account_id',
@@ -117,7 +160,7 @@ class testCommonUtils extends TestCase {
 		  'search' => 'true',
 		);
 		$actual = getBasic_Advance_SearchURL();
-		$expected = '&query=true&searchtype=BasicSearch&search_field=account_id&search_text=&amp;';
+		$expected = '&query=true&searchtype=BasicSearch&search_field=account_id&search_text=&amp;&type=';
 		$this->assertEquals($expected, $actual, 'getBasic_Advance_SearchURL 3');
 		$_REQUEST = array(
 		  'advft_criteria' => '[{"groupid":"1","columnname":"vtiger_contactdetails:firstname:firstname:Contacts_First_Name:V","comparator":"c","value":"lina","columncondition":"and"},{"groupid":"1","columnname":"vtiger_contactdetails:accountid:account_id:Contacts_Account_Name:V","comparator":"c","value":"&","columncondition":""}]',
@@ -160,7 +203,7 @@ class testCommonUtils extends TestCase {
 		  'search' => 'true',
 		);
 		$actual = getBasic_Advance_SearchURL();
-		$expected = '&query=true&searchtype=BasicSearch&search_field=account_id&search_text=&amp; li';
+		$expected = '&query=true&searchtype=BasicSearch&search_field=account_id&search_text=&amp; li&type=';
 		$this->assertEquals($expected, $actual, 'getBasic_Advance_SearchURL 6');
 		$_REQUEST = $actualRequest;
 	}
@@ -230,6 +273,44 @@ line2','line2\r\nline2','br2nl two lines crnl'),
 	}
 
 	/**
+	 * Method getbr2nlvtProvider
+	 * params
+	 */
+	public function getbr2nlvtProvider() {
+		return array(
+			array('line1','line1','br2nl one line'),
+			array('line1<br>line2','line1<br>line2','br2nl two lines <br>'),
+			array('line1<br/>line2','line1<br/>line2','br2nl two lines <br/>'),
+			array('line1
+line2','line1
+line2','br2nl two lines nl'),
+			array('line1line2','line1line2','br2nl two lines cr'),
+			array('line2
+line2','line2 line2','br2nl two lines crnl'),
+			array('line1
+
+line2','line1
+
+line2','br2nl two lines nlcr'),
+			array("line1\nline2","line1\nline2",'br2nl two lines nl'),
+			array("line1\rline2","line1\rline2",'br2nl two lines cr'),
+			array("line1\r\nline2",'line1 line2','br2nl two lines crnl'),
+			array("line1\n\rline2","line1\n\rline2",'br2nl two lines nlcr'),
+			array("line1'line2","line1'line2",'br2nl two lines singlequote'),
+			array('line1"line2','line1"line2','br2nl two lines doublequote'),
+		);
+	}
+
+	/**
+	 * Method testbr2nl_vt
+	 * @test
+	 * @dataProvider getbr2nlvtProvider
+	 */
+	public function testbr2nl_vt($input, $expected, $msg) {
+		$this->assertEquals($expected, br2nl_vt($input), $msg);
+	}
+
+	/**
 	 * Method testgetUserslist1
 	 * @test
 	 */
@@ -281,19 +362,21 @@ line2','line2\r\nline2','br2nl two lines crnl'),
 		$lang = return_module_language('en_us', 'Reports');
 		$mes = date('m')-1;
 		return array(
-			array('Description $leads-firstname$',4260,'Leads','Description Timothy','Lead name alone'),
-			array('Description $users-user_name$',5,'Users','Description testdmy','User name alone'),
-			array('Description $leads-firstname$ $users-user_name$',4260,'Leads','Description Timothy $users-user_name$','Lead name + user name'),
-			array('Description $leads-firstname$ $users-user_name$',5,'Users','Description $leads-firstname$ testdmy','User name + lead name'),
-			array('Description $leads-firstname$ $users-user_name$',0,'Leads','Description $leads-firstname$ $users-user_name$','Empty ID'),
-			array('Description $leads-firstname$ $users-user_name$',5,'','Description $leads-firstname$ $users-user_name$','Empty Entity'),
+			array('Description $leads-firstname$',4260,'Leads', [], 'Description Timothy','Lead name alone'),
+			array('Description $leads-firstname$',4260,'Leads', ['Email_AutomaticMerge'=>0], 'Description $leads-firstname$','Lead name alone'),
+			array('Description $leads-firstname$',4260,'Leads', ['Email_AutomaticMerge'=>1], 'Description Timothy','Lead name alone'),
+			array('Description $users-user_name$',5,'Users', [],'Description testdmy','User name alone'),
+			array('Description $leads-firstname$ $users-user_name$',4260,'Leads', [],'Description Timothy $users-user_name$','Lead name + user name'),
+			array('Description $leads-firstname$ $users-user_name$',5,'Users', [],'Description $leads-firstname$ testdmy','User name + lead name'),
+			array('Description $leads-firstname$ $users-user_name$',0,'Leads', [],'Description $leads-firstname$ $users-user_name$','Empty ID'),
+			array('Description $leads-firstname$ $users-user_name$',5,'', [],'Description $leads-firstname$ $users-user_name$','Empty Entity'),
 			array('$leads-firstname$  Firstname
 
 $leads-lastname$  Last Name
 
 $leads-email$
 
-Email',4260,'Leads','Timothy  Firstname
+Email',4260,'Leads', [],'Timothy  Firstname
 
 Mulqueen  Last Name
 
@@ -303,7 +386,7 @@ Email','Multiple vars and lines'),
 			array('Dear 
 
 Thank you for your confidence in our ability to serve you. 
-We are glad to be given the chance to serve you.I look ',5,'Users','Dear 
+We are glad to be given the chance to serve you.I look ',5,'Users', [],'Dear 
 
 Thank you for your confidence in our ability to serve you. 
 We are glad to be given the chance to serve you.I look ','Just text'),
@@ -323,7 +406,7 @@ We are glad to be given the chance to serve you.I look ','Just text'),
 				<tr>
 					<td align="center"><strong>$URL$</strong></td>
 				</tr>
-			</table>',1086,'Contacts','<table align="center" border="0" cellpadding="0" cellspacing="0" style="font-family: Arial,Helvetica,sans-serif; font-size: 12px; font-weight: normal; text-decoration: none; background-color: rgb(122, 122, 254);" width="700">
+			</table>',1086,'Contacts', [],'<table align="center" border="0" cellpadding="0" cellspacing="0" style="font-family: Arial,Helvetica,sans-serif; font-size: 12px; font-weight: normal; text-decoration: none; background-color: rgb(122, 122, 254);" width="700">
 				<tr>
 					<td align="center" rowspan="4">$logo$</td>
 					<td align="center">&nbsp;</td>
@@ -342,25 +425,25 @@ We are glad to be given the chance to serve you.I look ','Just text'),
 			</table>','HTML and inexistent variables'),
 			array('Contact name: $contacts-lastname$
 Contact Image: $contacts-imagename$
-Contact Image Field: $contacts-imagename_fullpath$',1086,'Contacts','Contact name: Hirpara
+Contact Image Field: $contacts-imagename_fullpath$',1086,'Contacts', [],'Contact name: Hirpara
 Contact Image: 
 Contact Image Field: $contacts-imagename_fullpath$','Contact Image'),
 			array('Contact name: $contacts-lastname$
-Current Date: $custom-currentdate$',1086,'Contacts','Contact name: Hirpara
+Current Date: $custom-currentdate$',1086,'Contacts', [],'Contact name: Hirpara
 Current Date: '.$lang['MONTH_STRINGS'][$mes].date(" j, Y"),'General variables'),
 			array('Contact name: $contacts-lastname$
 Current Date: $custom-currentdate$
 Contact WF name: $firstname $lastname
 Account Name: $(account_id : (Accounts) accountname)
-Site URL: $URL$',1086,'Contacts','Contact name: Hirpara
+Site URL: $URL$',1086,'Contacts', [],'Contact name: Hirpara
 Current Date: '.$lang['MONTH_STRINGS'][$mes].date(' j, Y').'
 Contact WF name: Felix Hirpara
 Account Name: Chemex Labs Ltd
 Site URL: $URL$','WF vars variables'),
-			array('Description $(general : (__VtigerMeta__) scanQRCode->firstname)', 4260, 'Leads','/^Description <img src="cid:qrcode[a-zA-Z0-9]+" \/>$/', 'Lead QRCode name'),
+			array('Description $(general : (__VtigerMeta__) scanQRCode->firstname)', 4260, 'Leads', [],'/^Description <img src="cid:qrcode[a-zA-Z0-9]+" \/>$/', 'Lead QRCode name'),
 			array('
 Description $(general : (__VtigerMeta__) scanQRCode->firstname)
-', 4260, 'Leads','/^
+', 4260, 'Leads', [],'/^
 Description <img src="cid:qrcode[a-zA-Z0-9]+" \/>
 $/', 'Lead QRCode name multiline'),
 			array('first line
@@ -368,7 +451,7 @@ Description $(general : (__VtigerMeta__) scanQRCode->firstname)
 WF name: $firstname $lastname
 $leads-firstname$ $users-user_name$
 $leads-lastname$ last line
-', 4260, 'Leads','/^first line
+', 4260, 'Leads', [],'/^first line
 Description <img src="cid:qrcode[a-zA-Z0-9]+" \/>
 WF name: Timothy Mulqueen
 Timothy \$users-user_name\$
@@ -382,11 +465,11 @@ $/', 'Lead QRCode name multiline mixed with legacy and workflow field references
 	 * @test
 	 * @dataProvider getMergedDescriptionProvider
 	 */
-	public function testgetMergedDescription($description, $id, $parent_type, $expected, $msg) {
+	public function testgetMergedDescription($description, $id, $parent_type, $context, $expected, $msg) {
 		if (strpos($description, 'scanQRCode->')) {
-			$this->assertRegExp($expected, getMergedDescription($description, $id, $parent_type), $msg);
+			$this->assertMatchesRegularExpression($expected, getMergedDescription($description, $id, $parent_type, $context), $msg);
 		} else {
-			$this->assertEquals($expected, getMergedDescription($description, $id, $parent_type), $msg);
+			$this->assertEquals($expected, getMergedDescription($description, $id, $parent_type, $context), $msg);
 		}
 	}
 
@@ -1371,6 +1454,9 @@ $/', 'Lead QRCode name multiline mixed with legacy and workflow field references
 			'uitype' => '2',
 			'typeofdata' => 'V~M',
 			'presence' => '0',
+			'defaultvalue' => '',
+			'generatedtype' => '1',
+			'displaytype' => '1',
 		);
 		$astname = array(
 			'tabid' => '43',
@@ -1382,6 +1468,9 @@ $/', 'Lead QRCode name multiline mixed with legacy and workflow field references
 			'uitype' => '1',
 			'typeofdata' => 'V~M',
 			'presence' => '0',
+			'defaultvalue' => '',
+			'generatedtype' => '1',
+			'displaytype' => '1',
 		);
 		$hdname = array(
 			'tabid' => '13',
@@ -1393,6 +1482,9 @@ $/', 'Lead QRCode name multiline mixed with legacy and workflow field references
 			'uitype' => '21',
 			'typeofdata' => 'V~M',
 			'presence' => '0',
+			'defaultvalue' => '',
+			'generatedtype' => '1',
+			'displaytype' => '1',
 		);
 		$pbxname = array(
 			'tabid' => '36',
@@ -1404,6 +1496,9 @@ $/', 'Lead QRCode name multiline mixed with legacy and workflow field references
 			'uitype' => '2',
 			'typeofdata' => 'V~M',
 			'presence' => '0',
+			'defaultvalue' => '',
+			'generatedtype' => '1',
+			'displaytype' => '1',
 		);
 		$eooname = false;
 		return array(
@@ -1624,6 +1719,9 @@ $/', 'Lead QRCode name multiline mixed with legacy and workflow field references
 			'cbPulse' => 'cbPulse',
 			'MsgTemplate' => 'MsgTemplate',
 			'cbCredentials' => 'cbCredentials',
+			'DocumentFolders' => 'DocumentFolders',
+			'pricebookproductrel' => 'pricebookproductrel',
+			'AutoNumberPrefix' => 'AutoNumberPrefix',
 		);
 		return array(
 			array(array(), $e1),
@@ -1692,5 +1790,33 @@ $/', 'Lead QRCode name multiline mixed with legacy and workflow field references
 		$this->assertEquals(['vtiger_cbcredentials'], getDenormalizedModules('cbCredentials'));
 		$this->assertEquals([], getDenormalizedModules('DoesNotExist'));
 		$this->assertEquals([], getDenormalizedModules('Accounts'));
+	}
+
+	/**
+	 * Method getSqlForNameInDisplayFormatProvider
+	 * params
+	 */
+	public function getSqlForNameInDisplayFormatProvider() {
+		return array(
+			array('', '', '', 'CONCAT()'),
+			array(array('first_name'=>'vtiger_users.first_name', 'last_name'=>'vtiger_users.last_name'), 'Users', '', 'CONCAT()'), // because fields are not in entityname
+			array(array('first_name'=>'vtiger_users.first_name', 'last_name'=>'vtiger_users.last_name'), 'Contacts', '', "CONCAT(,'',)"), // garbage in > garbage out
+			array(array('firstname'=>'vtiger_users.first_name', 'lastname'=>'vtiger_users.last_name'), 'Contacts', '', "CONCAT(vtiger_users.first_name,'',vtiger_users.last_name)"), // this is WRONG!!
+			array(array('firstname'=>'we can put', 'lastname'=>'anything we want here'), 'Contacts', '', "CONCAT(we can put,'',anything we want here)"), // this is WRONG!!
+			array(array('firstname'=>'vtiger_contacts.firstname', 'lastname'=>'vtiger_contacts.lastname'), 'Contacts', '', "CONCAT(vtiger_contacts.firstname,'',vtiger_contacts.lastname)"),
+			array(array('firstname'=>'vtiger_contacts.firstname', 'lastname'=>'vtiger_contacts.lastname'), 'Contacts', 'glue', "CONCAT(vtiger_contacts.firstname,'glue',vtiger_contacts.lastname)"),
+			array(array('ename'=>'vtiger_users.ename'), 'Users', '', 'CONCAT(vtiger_users.ename)'),
+			array(array('ename'=>'vtiger_users.ename'), 'Users', 'glue', 'CONCAT(vtiger_users.ename)'),
+			array(array('ename'=>'again, anything we want'), 'Users', '', 'CONCAT(again, anything we want)'),
+		);
+	}
+
+	/**
+	 * Method testgetSqlForNameInDisplayFormat
+	 * @test
+	 * @dataProvider getSqlForNameInDisplayFormatProvider
+	 */
+	public function testgetSqlForNameInDisplayFormat($input, $module, $glue, $expected) {
+		$this->assertEquals($expected, getSqlForNameInDisplayFormat($input, $module, $glue));
 	}
 }

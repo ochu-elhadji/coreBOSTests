@@ -41,49 +41,145 @@ class cbRuleTest extends TestCase {
 	}
 
 	/**
+	 * Method testInsecureContext
+	 * @test
+	 */
+	public function testInsecureContext() {
+		global $current_user;
+		$this->assertEquals(
+			'yes',
+			coreBOS_Rule::evaluate(
+				'isPermitted_ConditionExpression',
+				array(
+					'record_id' => '11x74',
+					'permitted_module' => 'Accounts',
+					'permitted_action' => 'EditView',
+					'permitted_record' => '11x74',
+				)
+			)
+		);
+		$this->assertEquals(
+			'yes',
+			coreBOS_Rule::evaluate(
+				'isPermitted_ConditionExpression',
+				array(
+					'record_id' => '11x74',
+					'permitted_module' => "Accounts'.system('cat /etc/passwd').'",
+					'permitted_action' => 'EditView',
+					'permitted_record' => '11x74',
+				)
+			)
+		);
+		$this->assertEquals(
+			'yes',
+			coreBOS_Rule::evaluate(
+				'isPermitted_ConditionExpression',
+				array(
+					'record_id' => '11x74',
+					'permitted_module' => "\'.system(\"cat /etc/passwd\").",
+					'permitted_action' => ");//EditView",
+					'permitted_record' => '11x74',
+				)
+			)
+		);
+		$user = new Users();
+		$user->retrieveCurrentUserInfoFromFile(11); // nocreate
+		$current_user = $user;
+		$this->assertEquals(
+			'no',
+			coreBOS_Rule::evaluate(
+				'isPermitted_ConditionExpression',
+				array(
+					'record_id' => '11x74',
+					'permitted_module' => 'Accounts',
+					'permitted_action' => 'EditView',
+					'permitted_record' => '11x74',
+				)
+			)
+		);
+		$this->assertEquals(
+			'yes',
+			coreBOS_Rule::evaluate(
+				'isPermitted_ConditionExpression',
+				array(
+					'record_id' => '11x74',
+					'permitted_module' => "Accounts'.system('cat /etc/passwd').'",
+					'permitted_action' => 'EditView',
+					'permitted_record' => '11x74',
+				)
+			)
+		);
+		$this->assertEquals(
+			'no',
+			coreBOS_Rule::evaluate(
+				'isPermitted_ConditionExpression',
+				array(
+					'record_id' => '11x74',
+					'permitted_module' => "\'.system(\"cat /etc/passwd\").",
+					'permitted_action' => ");//EditView",
+					'permitted_record' => '11x74',
+				)
+			)
+		);
+		$this->assertEquals(
+			'no',
+			coreBOS_Rule::evaluate(
+				'isPermitted_ConditionExpression',
+				array(
+					'record_id' => '4062',
+					'permitted_module' => 'SMSNOtifier',
+					'permitted_action' => 'EditView',
+					'permitted_record' => '4062',
+				)
+			)
+		);
+		$current_user = Users::getActiveAdminUser();
+	}
+
+	/**
 	 * Method testExceptionAccessDeniedInvalidID
 	 * @test
-	 * @expectedException WebServiceException
-	 * @expectedExceptionCode ACCESS_DENIED
 	 */
 	public function testExceptionAccessDeniedInvalidID() {
-		$rule = coreBOS_Rule::evaluate(27078, 'aaa1x1bbb');
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('ACCESS_DENIED');
+		coreBOS_Rule::evaluate(27078, 'aaa1x1bbb');
 	}
 
 	/**
 	 * Method testExceptionAccessDenied
 	 * @test
-	 * @expectedException WebServiceException
-	 * @expectedExceptionCode ACCESS_DENIED
 	 */
 	public function testExceptionAccessDenied() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('ACCESS_DENIED');
 		$holduser = $current_user;
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(7); // testymd
 		$current_user = $user;
-		$rule = coreBOS_Rule::evaluate(27078, '14x2616');
+		coreBOS_Rule::evaluate(27078, '14x2616');
 		$current_user = $holduser;
 	}
 
 	/**
 	 * Method testExceptionInvalidBMNonExistent
 	 * @test
-	 * @expectedException WebServiceException
-	 * @expectedExceptionCode INVALID_BUSINESSMAP
 	 */
 	public function testExceptionInvalidBMNonExistent() {
-		$rule = coreBOS_Rule::evaluate(1, '11x74');
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_BUSINESSMAP');
+		coreBOS_Rule::evaluate(1, '11x74');
 	}
 
 	/**
 	 * Method testExceptionInvalidBMIncorrectType
 	 * @test
-	 * @expectedException WebServiceException
-	 * @expectedExceptionCode INVALID_BUSINESSMAP
 	 */
 	public function testExceptionInvalidBMIncorrectType() {
-		$rule = coreBOS_Rule::evaluate(34030, '11x74');
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_BUSINESSMAP');
+		coreBOS_Rule::evaluate(34030, '11x74');
 	}
 
 	/**

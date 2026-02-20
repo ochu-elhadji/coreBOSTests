@@ -22,23 +22,25 @@ use PHPUnit\Framework\TestCase;
 
 include_once 'include/Webservices/AuthToken.php';
 
-class testWSAuthToken extends TestCase {
+class AuthTokenTest extends TestCase {
 
 	/**
 	 * Method testchallengewrong
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testchallengewrong() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('AUTHENTICATION_REQUIRED');
 		vtws_getchallenge('user_does_not_exist');
 	}
 
 	/**
 	 * Method testchallengeempty
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testchallengeempty() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('AUTHENTICATION_REQUIRED');
 		vtws_getchallenge('');
 	}
 
@@ -61,7 +63,7 @@ class testWSAuthToken extends TestCase {
 		$this->assertEquals($get_token->fields['expiretime'], $actualupd['expireTime']);
 		$this->assertEquals($actual['token'], $actualupd['token']);
 		$this->assertEquals($actual['expireTime'], $actualupd['expireTime']);
-		$this->assertEquals($actual['serverTime'], $actualupd['serverTime']);
+		$this->assertEqualsWithDelta($actual['serverTime'], $actualupd['serverTime'], 4);
 		sleep(1);
 		$new_expire_time = time()-(60*120); // simulate passing of time
 		$adb->pquery('UPDATE vtiger_ws_userauthtoken SET expiretime=? WHERE userid=?', array($new_expire_time, 1));

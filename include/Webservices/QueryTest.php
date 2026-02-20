@@ -20,7 +20,9 @@
 
 use PHPUnit\Framework\TestCase;
 
-class testWSQuery extends TestCase {
+$Vtiger_Utils_Log = false;
+
+class QueryTest extends TestCase {
 
 	/**
 	 * Method testQuery
@@ -46,7 +48,8 @@ class testWSQuery extends TestCase {
 	 * @test
 	 */
 	public function testQueryCache() {
-		global $current_user;
+		global $current_user,$Vtiger_Utils_Log;
+		$Vtiger_Utils_Log = false;
 		$Module = 'HelpDesk';
 		$modhd = Vtiger_Module::getInstance($Module);
 		$blkhd = Vtiger_Block::getInstance('LBL_TICKET_INFORMATION', $modhd);
@@ -137,7 +140,6 @@ class testWSQuery extends TestCase {
 	/**
 	 * Method testMissingSemicolon
 	 * @test
-	 * @expectedException Exception
 	 */
 	public function testCreateWithDatesWrong() {
 		global $current_user;
@@ -149,7 +151,6 @@ class testWSQuery extends TestCase {
 	/**
 	 * Method testWrongModule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testWrongModule() {
 		global $current_user;
@@ -161,7 +162,6 @@ class testWSQuery extends TestCase {
 	/**
 	 * Method testWrongSyntax
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testWrongSyntax() {
 		global $current_user;
@@ -174,7 +174,6 @@ class testWSQuery extends TestCase {
 	/**
 	 * Method testWrongSyntax
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testNoPermissionOnModule() {
 		global $current_user;

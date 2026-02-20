@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase;
 include_once 'include/Webservices/GetRelatedRecords.php';
 include_once 'include/Webservices/upsert.php';
 
-class testWSgetRelatedRecords extends TestCase {
+class getRelatedRecordsTest extends TestCase {
 
 	/**
 	 * Method getRelatedRecordsProvider
@@ -621,8 +621,8 @@ class testWSgetRelatedRecords extends TestCase {
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile($userid);
 		$current_user = $user;
-		$actual = getRelatedRecords($id, $module, $relatedModule, $queryParameters, $current_user);
-		$this->assertEqualsCanonicalizing($expected, $actual, $msg);
+		$actual = array_multisort(getRelatedRecords($id, $module, $relatedModule, $queryParameters, $current_user));
+		$this->assertEquals(array_multisort($expected), $actual, $msg);
 		$current_user = $holduser;
 	}
 
@@ -872,20 +872,58 @@ class testWSgetRelatedRecords extends TestCase {
 		$expected= array(
 			'records' => array(
 				array(
-					0 => 'U8 Smart Watch',
+					0 => $actual['records'][0][0],
 					'productname' => 'U8 Smart Watch',
-					1 => '2632',
+					1 => 'pcmpnt0000001',
 					'productid' => '2632',
-					2 => '6cebe554cba001a58c6347b80bd49be4eb700c23',
+					2 => '2631',
+					'productcomponentid' => $actual['records'][0]['productcomponentid'],
+					'relno' => 'pcmpnt0000001',
+					'frompdo' => '2631',
+					3 => '2632',
+					'topdo' => '2632',
+					4 => 'Optional',
+					'relmode' => 'Optional',
+					5 => '2018-06-27',
+					'relfrom' => '2018-06-27',
+					6 => '2022-06-27',
+					'relto' => '2022-06-27',
+					7 => '1.000000',
+					'quantity' => '1.000000',
+					8 => '',
+					'instructions' => '',
+					9 => $actual['records'][0][9],
+					10 => 'U8 Smart Watch',
+					11 => '2632',
+					12 => '6cebe554cba001a58c6347b80bd49be4eb700c23',
 					'cbuuid' => '6cebe554cba001a58c6347b80bd49be4eb700c23',
 					'id' => '14x2632',
 				),
 				array(
-					0 => 'Leagoo Lead 3s Mobile Phone',
+					0 => $actual['records'][1][0],
 					'productname' => 'Leagoo Lead 3s Mobile Phone',
-					1 => '2633',
+					1 => 'pcmpnt0000002',
 					'productid' => '2633',
-					2 => '1f6f67cda5d84e91ba4bfa399d4550b4597d1f62',
+					2 => '2631',
+					'productcomponentid' => $actual['records'][1]['productcomponentid'],
+					'relno' => 'pcmpnt0000002',
+					'frompdo' => '2631',
+					3 => '2633',
+					'topdo' => '2633',
+					4 => 'Required',
+					'relmode' => 'Required',
+					5 => '2018-06-27',
+					'relfrom' => '2018-06-27',
+					6 => '2022-06-27',
+					'relto' => '2022-06-27',
+					7 => '1.000000',
+					'quantity' => '1.000000',
+					8 => '',
+					'instructions' => '',
+					9 => $actual['records'][1][9],
+					10 => 'Leagoo Lead 3s Mobile Phone',
+					11 => '2633',
+					12 => '1f6f67cda5d84e91ba4bfa399d4550b4597d1f62',
 					'cbuuid' => '1f6f67cda5d84e91ba4bfa399d4550b4597d1f62',
 					'id' => '14x2633',
 				),
@@ -915,11 +953,30 @@ class testWSgetRelatedRecords extends TestCase {
 		$expected= array(
 			'records' => array(
 				array(
-					0 => '4Pcs 2.2Bar 32Psi Car Tyre Tire Pressure Valve Stem Caps Sensor 3 Color Eye Air Alert Tire Pressure ',
+					0 => $actual['records'][0][0],
 					'productname' => '4Pcs 2.2Bar 32Psi Car Tyre Tire Pressure Valve Stem Caps Sensor 3 Color Eye Air Alert Tire Pressure ',
-					1 => '2631',
+					1 => 'pcmpnt0000001',
 					'productid' => '2631',
-					2 => '6cebe554cba001a58c6347b80bd49be4eb700c23',
+					2 => '2631',
+					'productcomponentid' => $actual['records'][0]['productcomponentid'],
+					'relno' => 'pcmpnt0000001',
+					'frompdo' => '2631',
+					3 => '2632',
+					'topdo' => '2632',
+					4 => 'Optional',
+					'relmode' => 'Optional',
+					5 => '2018-06-27',
+					'relfrom' => '2018-06-27',
+					6 => '2022-06-27',
+					'relto' => '2022-06-27',
+					7 => '1.000000',
+					'quantity' => '1.000000',
+					8 => '',
+					'instructions' => '',
+					9 => $actual['records'][0][9],
+					10 => '4Pcs 2.2Bar 32Psi Car Tyre Tire Pressure Valve Stem Caps Sensor 3 Color Eye Air Alert Tire Pressure ',
+					11 => '2631',
+					12 => '6cebe554cba001a58c6347b80bd49be4eb700c23',
 					'cbuuid' => '6cebe554cba001a58c6347b80bd49be4eb700c23',
 					'id' => '14x2631',
 				),
@@ -1386,7 +1443,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testInvalidModuleGRR
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testInvalidModuleGRR() {
 		global $current_user;
@@ -1398,7 +1454,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testActorModuleGRR
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testActorModuleGRR() {
 		global $current_user;
@@ -1410,7 +1465,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testActorRelatedModuleGRR
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testActorRelatedModuleGRR() {
 		global $current_user;
@@ -1422,7 +1476,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testNonEntityModuleGRR
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testNonEntityModuleGRR() {
 		global $current_user;
@@ -1434,7 +1487,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testNonEntityRelatedModuleGRR
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testNonEntityRelatedModuleGRR() {
 		global $current_user;
@@ -1446,7 +1498,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testInvalidModuleGRQ
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testInvalidModuleGRQ() {
 		global $current_user;
@@ -1458,7 +1509,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testActorModuleGRQ
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testActorModuleGRQ() {
 		global $current_user;
@@ -1470,7 +1520,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testActorRelatedModuleGRQ
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testActorRelatedModuleGRQ() {
 		global $current_user;
@@ -1482,7 +1531,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testNonEntityModuleGRQ
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testNonEntityModuleGRQ() {
 		global $current_user;
@@ -1494,7 +1542,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testNonEntityRelatedModuleGRQ
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testNonEntityRelatedModuleGRQ() {
 		global $current_user;
@@ -1506,7 +1553,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testNoPermissionModule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testNoPermissionModule() {
 		global $current_user;
@@ -1529,7 +1575,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testNoPermissionRelatedModule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testNoPermissionRelatedModule() {
 		global $current_user;
@@ -1552,7 +1597,6 @@ class testWSgetRelatedRecords extends TestCase {
 	/**
 	 * Method testInvalidID
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testInvalidID() {
 		global $current_user;

@@ -20,7 +20,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-class testDatabaseUtil extends TestCase {
+class DatabaseUtilTest extends TestCase {
 
 	/****
 	 * TEST Users decimal configuration
@@ -94,7 +94,7 @@ class testDatabaseUtil extends TestCase {
 				'min' => "SELECT min(employees) as min from vtiger_account where accountname like '%che%' order by account_type",
 				'sum' => "SELECT sum(employees) as sum from vtiger_account where accountname like '%che%' order by account_type",
 				'avg' => "SELECT avg(employees) as avg from vtiger_account where accountname like '%che%' order by account_type",
-				'tot' => "SELECT sum(employees) AS total from vtiger_account where accountname like '%che%' order by account_type",
+				'tot' => "SELECT sum(employees) AS total from vtiger_account where accountname like '%che%'",
 				'cnt' => "SELECT count(*) AS count from vtiger_account where accountname like '%che%'",
 				'ful' => "SELECT count(*) AS count FROM (select account_type, employees from vtiger_account where accountname like '%che%') as sqlcount",
 				),
@@ -108,7 +108,7 @@ class testDatabaseUtil extends TestCase {
 				'min' => "SELECT min(employees) as min from vtiger_account where accountname like '%che%' group by account_type",
 				'sum' => "SELECT sum(employees) as sum from vtiger_account where accountname like '%che%' group by account_type",
 				'avg' => "SELECT avg(employees) as avg from vtiger_account where accountname like '%che%' group by account_type",
-				'tot' => "SELECT sum(employees) AS total from vtiger_account where accountname like '%che%' group by account_type",
+				'tot' => "SELECT sum(employees) AS total from vtiger_account where accountname like '%che%'",
 				'cnt' => "SELECT count(*) AS count from vtiger_account where accountname like '%che%'",
 				'ful' => "SELECT count(*) AS count FROM (select account_type, count(employees) from vtiger_account where accountname like '%che%' group by account_type) as sqlcount",
 				),
@@ -122,7 +122,7 @@ class testDatabaseUtil extends TestCase {
 				'min' => "SELECT min(employees) as min from vtiger_account where accountname like '%che%' group by account_type order by account_type",
 				'sum' => "SELECT sum(employees) as sum from vtiger_account where accountname like '%che%' group by account_type order by account_type",
 				'avg' => "SELECT avg(employees) as avg from vtiger_account where accountname like '%che%' group by account_type order by account_type",
-				'tot' => "SELECT sum(employees) AS total from vtiger_account where accountname like '%che%' group by account_type order by account_type",
+				'tot' => "SELECT sum(employees) AS total from vtiger_account where accountname like '%che%'",
 				'cnt' => "SELECT count(*) AS count from vtiger_account where accountname like '%che%'",
 				'ful' => "SELECT count(*) AS count FROM (select account_type, count(employees) from vtiger_account where accountname like '%che%' group by account_type) as sqlcount",
 				),
@@ -230,6 +230,15 @@ class testDatabaseUtil extends TestCase {
 		global $adb;
 		$mksql = mkCountQuery($query);
 		$this->assertEquals($expected['cnt'], $mksql, $msg);
+		$rs = $adb->query($mksql);
+		$this->assertTrue($rs !== false);
+		/////////
+		$mksql = mkCountQuery($query, false);
+		if (stripos($query, ' group by ')) {
+			$this->assertEquals($expected['cnt'].' group by account_type', $mksql, $msg);
+		} else {
+			$this->assertEquals($expected['cnt'], $mksql, $msg);
+		}
 		$rs = $adb->query($mksql);
 		$this->assertTrue($rs !== false);
 	}
@@ -359,6 +368,12 @@ class testDatabaseUtil extends TestCase {
 	 */
 	public function appendFromClauseToQueryProvider() {
 		return array(
+			array(
+				'SELECT vtiger_cbdeliverytask.task_no FROM vtiger_cbdeliverytask INNER JOIN vtiger_crmentity ON vtiger_cbdeliverytask.cbdeliverytaskid=vtiger_crmentity.crmid LEFT JOIN vtiger_account ON vtiger_cbdeliverytask.customer_name=vtiger_account.accountid WHERE vtiger_crmentity.deleted=0 AND vtiger_cbdeliverytask.cbdeliverytaskid > 0 order by vtiger_cbdeliverytask.cbdeliverytaskid asc limit 0,20',
+				'INNER JOIN vtiger_account ON vtiger_cbdeliverytask.task_account_name=vtiger_account.accountid and vtiger_cbdeliverytask.task_account_name=33140',
+				'INNER JOIN vtiger_account ON vtiger_cbdeliverytask.task_account_name=vtiger_account.accountid',
+				'SELECT vtiger_cbdeliverytask.task_no FROM vtiger_cbdeliverytask INNER JOIN vtiger_crmentity ON vtiger_cbdeliverytask.cbdeliverytaskid=vtiger_crmentity.crmid INNER JOIN vtiger_account ON vtiger_cbdeliverytask.task_account_name=vtiger_account.accountid and vtiger_cbdeliverytask.task_account_name=33140 WHERE vtiger_crmentity.deleted=0 AND vtiger_cbdeliverytask.cbdeliverytaskid > 0 order by vtiger_cbdeliverytask.cbdeliverytaskid asc limit 0,20',
+			),
 			array(
 				'select vtiger_notes.title from vtiger_notes inner join vtiger_senotesrel on vtiger_senotesrel.notesid= vtiger_notes.notesid left join vtiger_notescf ON vtiger_notescf.notesid= vtiger_notes.notesid inner join vtiger_crmentity on vtiger_crmentity.crmid= vtiger_notes.notesid and vtiger_crmentity.deleted=0 left join vtiger_users on vtiger_crmentity.smownerid= vtiger_users.id where crm2.crmid=75',
 				'inner join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid and vtiger_senotesrel.crmid IN (74,1084)',

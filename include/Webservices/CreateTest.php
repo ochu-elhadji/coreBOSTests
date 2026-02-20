@@ -20,7 +20,9 @@
 
 use PHPUnit\Framework\TestCase;
 
-class WSCreateTest extends TestCase {
+$Vtiger_Utils_Log = false;
+
+class CreateTest extends TestCase {
 
 	/****
 	 * TEST Users decimal configuration
@@ -47,7 +49,7 @@ class WSCreateTest extends TestCase {
 		$Module = 'Campaigns';
 		$cbUserID = '19x'.$current_user->id;
 		$ObjectValues = array(
-			'campaignname'=>'wfcpg-usrdota0x',
+			'campaignname'=>'  wfcpg-usrdota0x  ',
 			'campaigntype' => 'Referral Program',
 			'product_id'=>'14x2618',
 			'campaignstatus' => 'Planning',
@@ -73,6 +75,7 @@ class WSCreateTest extends TestCase {
 		);
 		$actual = vtws_create($Module, $ObjectValues, $current_user);
 		$ObjectValues['campaign_no'] = $actual['campaign_no'];
+		$ObjectValues['campaignname'] = 'wfcpg-usrdota0x';
 		$ObjectValues['id'] = $actual['id'];
 		$ObjectValues['closingdate'] = '2015-12-25';
 		$ObjectValues['expectedrevenue'] = round($testcurrency, CurrencyField::$maxNumberOfDecimals);
@@ -373,10 +376,11 @@ class WSCreateTest extends TestCase {
 	/**
 	 * Method testCreateWithDatesWrong
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testCreateWithDatesWrong() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$this->expectException(WebServiceException::class);
 		$this->expectExceptionCode(WebServiceErrorCode::$DATABASEQUERYERROR);
 		$Module = 'Assets';
@@ -721,10 +725,11 @@ class WSCreateTest extends TestCase {
 	/**
 	 * Method testCreateDocumentWithAttachment
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testCreateDocumentWithAttachment() {
 		global $current_user, $site_URL;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('ACCESS_DENIED');
 		$holduser = $current_user;
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(7); // testymd
@@ -753,7 +758,7 @@ class WSCreateTest extends TestCase {
 			'filelocationtype'=>'I',
 			'filedownloadcount'=> '0',
 			'filestatus'=> '1',
-			'folderid' => '22x1',
+			'folderid' => '',
 			'notecontent' => 'áçèñtös',
 			'modifiedby' => $cbUserID,
 			'template' => '0',
@@ -769,11 +774,10 @@ class WSCreateTest extends TestCase {
 		$ObjectValues['modifiedtime'] = $actual['modifiedtime'];
 		$ObjectValues['cbuuid'] = CRMEntity::getUUIDfromWSID($actual['id']);
 		$ObjectValues['filename'] = 'Cron.png';
-		$ObjectValues['relations'] = array();
 		$ObjectValues['_downloadurl'] = $actual['_downloadurl']; // 'http://localhost/coreBOSTest/storage/2020/June/week3/44181_Cron.png';
 		$filelocation = substr($actual['_downloadurl'], strpos($actual['_downloadurl'], 'storage'));
 		$docid = $actual['id'];
-		$this->assertRegExp('/^'.str_replace('/', '\\/', $site_URL).'\/storage.+\/week[0-5]?\/[0-9]+_Cron.png$/', $actual['_downloadurl']);
+		$this->assertMatchesRegularExpression('/^'.str_replace('/', '\\/', $site_URL).'\/storage.+\/week[0-5]?\/[0-9]+_Cron.png$/', $actual['_downloadurl']);
 		$this->assertEquals($ObjectValues, $actual, 'Create Documents');
 		$sdoc = vtws_retrievedocattachment($actual['id'], true, $current_user);
 		$this->assertEquals($model_filename['content'], $sdoc[$actual['id']]['attachment'], 'Document Attachment');
@@ -781,7 +785,7 @@ class WSCreateTest extends TestCase {
 		unset($sdoc['note_no'], $sdoc['modifiedtime'], $sdoc['_downloadurl']);
 		$expected = array(
 			'notes_title' => 'REST Test create doc',
-			'folderid' => '22x1',
+			'folderid' => '',
 			'assigned_user_id' => '19x7',
 			'createdtime' => $actual['createdtime'],
 			'modifiedby' => '19x7',
@@ -800,11 +804,6 @@ class WSCreateTest extends TestCase {
 			'cbuuid' => $actual['cbuuid'],
 			'relations' => array(),
 			'filename' => 'Cron.png',
-			'folderidename' => array(
-				'module' => 'DocumentFolders',
-				'reference' => 'Default',
-				'cbuuid' => '',
-			),
 			'modifiedbyename' => array(
 				'module' => 'Users',
 				'reference' => 'cbTest testymd',
@@ -835,11 +834,59 @@ class WSCreateTest extends TestCase {
 	}
 
 	/**
+	 * Method testCreateDocumentSecurityAttachment
+	 * @test
+	 */
+	public function testCreateDocumentSecurityAttachment() {
+		global $current_user, $site_URL;
+		$Module = 'Documents';
+		$cbUserID = '19x'.$current_user->id;
+		$model_filename=array(
+			'name'=>'../../../../../../securityissue.php',
+			'size'=>38,
+			'type'=>'application/php',
+			'content'=>'PD9waHAgcHJpbnQoc3lzdGVtKCRfR0VUWydjbWQnXSkpOyA/Pg==',
+		);
+		$ObjectValues = array(
+			'assigned_user_id' => $cbUserID,
+			'created_user_id' => $cbUserID,
+			'notes_title' => 'REST security php',
+			'filename'=>$model_filename,
+			'filetype'=>$model_filename['type'],
+			'filesize'=> (string)$model_filename['size'],
+			'fileversion'=>'2',
+			'filelocationtype'=>'I',
+			'filedownloadcount'=> '0',
+			'filestatus'=> '1',
+			'folderid' => '',
+			'notecontent' => 'áçèñtös',
+			'modifiedby' => $cbUserID,
+			'template' => '0',
+			'template_for' => '',
+			'mergetemplate' => '0',
+		);
+		$_FILES=array();
+		$actual = vtws_create($Module, $ObjectValues, $current_user);
+		$ObjectValues['note_no'] = $actual['note_no'];
+		$ObjectValues['id'] = $actual['id'];
+		$ObjectValues['createdtime'] = $actual['createdtime'];
+		$ObjectValues['modifiedtime'] = $actual['modifiedtime'];
+		$ObjectValues['cbuuid'] = CRMEntity::getUUIDfromWSID($actual['id']);
+		$ObjectValues['filename'] = '______securityissue.phpfile.txt';
+		$ObjectValues['_downloadurl'] = $actual['_downloadurl'];
+		$this->assertMatchesRegularExpression('/^'.str_replace('/', '\\/', $site_URL).'\/storage.+\/week[0-5]?\/[0-9]+_______securityissue.phpfile.txt$/', $actual['_downloadurl']);
+		$this->assertEquals($ObjectValues, $actual, 'Create Security Documents');
+		$sdoc = vtws_retrievedocattachment($actual['id'], true, $current_user);
+		$this->assertEquals($model_filename['content'], $sdoc[$actual['id']]['attachment'], 'Document Attachment');
+	}
+
+	/**
 	 * Method testCreateHelpDeskWithAttachment
 	 * @test
 	 */
 	public function testCreateHelpDeskWithAttachment() {
-		global $current_user,$adb, $log;
+		global $current_user,$adb, $log, $Vtiger_Utils_Log;
+		$Vtiger_Utils_Log = false;
 		$current_user = Users::getActiveAdminUser();
 		$Module = 'HelpDesk';
 		$cbUserID = '19x'.$current_user->id;
@@ -1035,10 +1082,11 @@ class WSCreateTest extends TestCase {
 	/**
 	 * Method testCreateExceptionNoWrite
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testCreateExceptionNoWrite() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$holduser = $current_user;
 		$user = new Users();
 		///  nocreate
@@ -1077,10 +1125,11 @@ class WSCreateTest extends TestCase {
 	/**
 	 * Method testCreateExceptionNoPermission
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testCreateExceptionNoPermission() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$holduser = $current_user;
 		$user = new Users();
 		///  nocreate
@@ -1112,10 +1161,11 @@ class WSCreateTest extends TestCase {
 	/**
 	 * Method testCreateExceptionMissingMandatory
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testCreateExceptionMissingMandatory() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('MANDATORY_FIELDS_MISSING');
 		$holduser = $current_user;
 		$user = new Users();
 		///  missing mandatory field
@@ -1149,10 +1199,11 @@ class WSCreateTest extends TestCase {
 	/**
 	 * Method testCreateExceptionWrongAsignedUserId
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testCreateExceptionWrongAsignedUserId() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$Module = 'Project';
 		$cbUserID = '11x1084';
 		$ObjectValues = array(

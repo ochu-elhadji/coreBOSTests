@@ -23,12 +23,11 @@ use PHPUnit\Framework\TestCase;
 include_once 'include/Webservices/LoginPortal.php';
 require_once 'include/Webservices/WebServiceErrorCode.php';
 
-class testWSLoginPortal extends TestCase {
+class LoginPortalTest extends TestCase {
 
 	/**
 	 * Method testwronguser
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testwronguser() {
 		$this->expectException(WebServiceException::class);
@@ -39,7 +38,6 @@ class testWSLoginPortal extends TestCase {
 	/**
 	 * Method testnotoken
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnotoken() {
 		global $adb;
@@ -53,7 +51,6 @@ class testWSLoginPortal extends TestCase {
 	/**
 	 * Method testwrongtoken
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testwrongtoken() {
 		vtws_getchallenge('julieta@yahoo.com');
@@ -65,7 +62,6 @@ class testWSLoginPortal extends TestCase {
 	/**
 	 * Method testnoportaluser
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnoportaluser() {
 		global $adb;
@@ -79,7 +75,6 @@ class testWSLoginPortal extends TestCase {
 	/**
 	 * Method testinactiveuser
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testinactiveuser() {
 		global $adb;
@@ -93,7 +88,6 @@ class testWSLoginPortal extends TestCase {
 	/**
 	 * Method testnoemployeemodule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnoemployeemodule() {
 		global $adb;
@@ -108,14 +102,10 @@ class testWSLoginPortal extends TestCase {
 	 */
 	public function testlogin() {
 		global $adb;
-		$SessionManagerStub = $this->createMock(SessionManager::class);
-		$SessionManagerStub->method('set')->withConsecutive(
-			[$this->equalTo('authenticatedUserId'), $this->equalTo(5)],
-			[$this->equalTo('authenticatedUserIsPortalUser'), $this->equalTo(1)],
-			[$this->equalTo('authenticatedUserPortalContact'), $this->equalTo(1085)],
-		);
-		$SessionManagerStub->method('startSession')->willReturn(true);
-		$SessionManagerStub->method('getSessionId')->willReturn('SmgrStubSessionID');
+		$SessionManagerStub = 'SessionManagerStub';
+		SessionManagerStub::$set_count = 0;
+		SessionManagerStub::$set_consecutive = false;
+		SessionManagerStub::$set_consecutive_count = 0;
 		$adb->query("UPDATE vtiger_contactdetails SET portalpasswordtype='md5',portalloginuser=5,template_language='es' WHERE contactid=1085");
 		$token = vtws_getchallenge('julieta@yahoo.com');
 		$actual = vtws_loginportal('julieta@yahoo.com', md5($token['token'].'5ub1ipv3'), 'Contacts', $SessionManagerStub);
@@ -130,6 +120,8 @@ class testWSLoginPortal extends TestCase {
 		);
 		unset($actual['user']['accesskey']);
 		$this->assertEquals($expected, $actual);
+		$this->assertEquals(3, SessionManagerStub::$set_consecutive_count);
+		$this->assertTrue(SessionManagerStub::$set_consecutive);
 		///////////////////////////
 		$adb->query("UPDATE vtiger_contactdetails SET portalpasswordtype='sha256',template_language='fr' WHERE contactid=1085");
 		$token = vtws_getchallenge('julieta@yahoo.com');

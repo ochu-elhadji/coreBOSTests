@@ -28,15 +28,13 @@ class PearDatabaseTest extends TestCase {
 	}
 
 	/**
-	 *	This function returns a samle query and an aray of parametersfor further testing
+	 * This function returns a sample query and an array of parameters for further testing
 	 */
 	public function testqueryProvider() {
-
 		$query = "SELECT * FROM vtiger_contactdetails WHERE contactid>? AND department=? LIMIT 5";
 		$id= 1084;
 		$department = 'Marketing';
 		$array = array($query,array($id,$department));
-
 		$this->assertTrue(true);
 		return $array;
 	}
@@ -46,7 +44,6 @@ class PearDatabaseTest extends TestCase {
 	 * @depends testqueryProvider
 	 */
 	public function testConvert2Sql($adb, $array) {
-
 		$convertedSql = $adb->convert2Sql($array[0], $array[1]);
 		$expectedSql = "SELECT * FROM vtiger_contactdetails WHERE contactid>1084 AND department='Marketing' LIMIT 5";
 		$this->assertEquals($expectedSql, $convertedSql);
@@ -106,6 +103,21 @@ class PearDatabaseTest extends TestCase {
 
 	/**
 	 * @depends testObjectType
+	 */
+	public function test_showtables() {
+		global $adb;
+		$result = $adb->query("show tables like 'vtiger_language'");
+		$this->assertEquals(1, $adb->num_rows($result), 'found one vtiger_language table query');
+		$array_result = (array)$result;
+		$this->assertFalse(empty($array_result), 'Result object should not be empty query');
+		$result = $adb->pquery('show tables like ?', array('vtiger_language'));
+		$this->assertEquals(1, $adb->num_rows($result), 'found one vtiger_language table pquery');
+		$array_result = (array)$result;
+		$this->assertFalse(empty($array_result), 'Result object should not be empty pquery');
+	}
+
+	/**
+	 * @depends testObjectType
 	 * here are the data types that correspond to the TYPE number returned by fetch_field.
 		numerics
 		-------------
@@ -148,14 +160,14 @@ class PearDatabaseTest extends TestCase {
 		LONGTEXT: 252
 	 */
 	public function test_getFieldsDefinition($adb) {
-		$sql = "SELECT * FROM marvel";
+		$sql = 'SELECT * FROM marvel';
 		$result = $adb->pquery($sql, array());
 		$filed_defs = $adb->getFieldsDefinition($result);
 		$expected = array(
 			'name' => 'name',
 			'table' => 'marvel',
 			'def' => '',
-			'max_length' => 54,
+			'max_length' => 0,
 			'not_null' => 1,
 			'primary_key' => 0,
 			'type' => 253,
@@ -170,6 +182,15 @@ class PearDatabaseTest extends TestCase {
 			'flags' => 4097,
 			'decimals' => 0,
 			'auto_increment' => 0,
+			'default_value' => '',
+			'has_default' => '',
+			'zerofill' => '',
+			'scale' => '',
+			'ttl_expression' => '',
+			'codec_expression' => '',
+			'default_expression' => '',
+			'comment' => '',
+			'default_type' => '',
 		);
 		$this->assertEquals($expected, (array)$filed_defs[0]);
 	}
@@ -223,6 +244,18 @@ class PearDatabaseTest extends TestCase {
 	public function test_fetch_array($expected, $adb, $result) {
 		$res = $adb->fetch_array($result);
 		$this->assertEquals($expected, $res);
+	}
+
+	/**
+	 * @depends testObjectType
+	 * @depends test_pquery
+	 */
+	public function testrowGenerator() {
+		global $adb;
+		$rs = $adb->pquery('select accountid from vtiger_account where accountid in (?,?);', array(74, 75));
+		$this->assertEquals([74, 'accountid' => 74], $adb->rowGenerator($rs)->current());
+		$this->assertEquals([75, 'accountid' => 75], $adb->rowGenerator($rs)->current());
+		$this->assertNull($adb->rowGenerator($rs)->current());
 	}
 
 	/**
@@ -358,7 +391,7 @@ class PearDatabaseTest extends TestCase {
 			'name' => 'contact_no',
 			'table' => 'vtiger_contactdetails',
 			'def' => '',
-			'max_length' => 5,
+			'max_length' => 0,
 			'type' => 253,
 			'unsigned' => 0,
 			'not_null' => 1,
@@ -373,6 +406,15 @@ class PearDatabaseTest extends TestCase {
 			'flags' => 4097,
 			'decimals' => 0,
 			'auto_increment' => 0,
+			'default_value' => '',
+			'has_default' => '',
+			'zerofill' => '',
+			'scale' => '',
+			'ttl_expression' => '',
+			'codec_expression' => '',
+			'default_expression' => '',
+			'comment' => '',
+			'default_type' => '',
 		);
 		$this->assertEquals($expected, (array)$field);
 	}
@@ -410,6 +452,17 @@ class PearDatabaseTest extends TestCase {
 	 */
 	public function test_getAffectedRowCount($adb, $result) {
 		$this->assertEquals(5, $adb->getAffectedRowCount($result));
+		$result = $adb->query('select 1 from vtiger_crmentity limit 10');
+		$this->assertEquals(10, $adb->getAffectedRowCount($result));
+		$result = $adb->query("SELECT name FROM `marvel` WHERE `name`='Hypernova'");
+		$this->assertEquals(1, $adb->getAffectedRowCount($result));
+		$result = $adb->query("UPDATE `marvel` SET name='notthere' WHERE `name`='Hypernova'");
+		$this->assertEquals(1, $adb->getAffectedRowCount($result));
+		// IT DOES NOT!!! WORK WITH PQUERY
+		$result = $adb->pquery('UPDATE `marvel` SET name=? WHERE `name`=?', ['Hypernova', 'notthere']);
+		$this->assertEquals(-1, $adb->getAffectedRowCount($result)); // -1 although the update worked!!
+		$result = $adb->query("SELECT name FROM `marvel` WHERE `name`='Hypernova'");
+		$this->assertEquals(1, $adb->getAffectedRowCount($result));
 	}
 
 	/**
@@ -419,6 +472,14 @@ class PearDatabaseTest extends TestCase {
 	public function test_requireSingleResult($expected, $adb) {
 		$result = $adb->requireSingleResult("SELECT * FROM vtiger_contactdetails WHERE firstname='Felix'");
 		$this->assertEquals($expected, $result->fields);
+	}
+
+	/**
+	 * @dataProvider metaProvider
+	 * @depends testObjectType
+	 */
+	public function test_getMetaColumns($table_name, $table_cols, $adb) {
+		$this->assertEquals($table_cols, $adb->getMetaColumns($table_name));
 	}
 
 	/**
@@ -453,7 +514,7 @@ class PearDatabaseTest extends TestCase {
 	/**
 	 * @depends testObjectType
 	 */
-	public function test_CreteTable($adb) {
+	public function test_CreateTable($adb) {
 		$adb->query('DROP TABLE vtiger_tmp;');
 		if (empty($adb->getColumnNames('vtiger_tmp'))) {
 			$this->assertEquals(2, $adb->CreateTable('vtiger_tmp', 'id INTEGER, name VARCHAR(100), email VARCHAR(100), type VARCHAR(7)'));
@@ -464,17 +525,20 @@ class PearDatabaseTest extends TestCase {
 	 * @depends testObjectType
 	 */
 	public function test_alterTable($adb) {
-		$adb->alterTable("vtiger_tmp", "surname VARCHAR(100)", "Add_Column");
-		$expected_fields = array("id","name","email","type","surname");
-		$this->assertEquals($expected_fields, $adb->getColumnNames("vtiger_tmp"));
+		$adb->alterTable('vtiger_tmp', 'surname VARCHAR(100)', 'Add_Column');
+		$expected_fields = array('id','name','email','type','surname');
+		$this->assertEquals($expected_fields, $adb->getColumnNames('vtiger_tmp'));
+		$adb->alterTable('vtiger_tmp', 'surname', 'Delete_Column');
+		$expected_fields = array('id','name','email','type');
+		$this->assertEquals($expected_fields, $adb->getColumnNames('vtiger_tmp'));
 	}
 
 	/**
 	 * @depends testObjectType
 	 */
 	public function test_escapeDbName($adb) {
-		$expected = "`database1`";
-		$dbname = $adb->escapeDbName("database1");
+		$expected = '`database1`';
+		$dbname = $adb->escapeDbName('database1');
 		$this->assertEquals($expected, $dbname);
 	}
 
@@ -864,6 +928,124 @@ class PearDatabaseTest extends TestCase {
 					3 => 'presence',
 				)
 			),
+		);
+	}
+
+	public function metaProvider() {
+		$at = array();
+		$af = new ADOFieldObject();
+		$af->name = 'activitytypeid';
+		$af->max_length = -1;
+		$af->type = 'int';
+		$af->scale = null;
+		$af->not_null = true;
+		$af->primary_key = true;
+		$af->auto_increment = true;
+		$af->binary = false;
+		$af->unsigned = false;
+		$af->zerofill = false;
+		$af->has_default = false;
+		$at['ACTIVITYTYPEID'] = $af;
+		$af = new ADOFieldObject();
+		$af->name = 'activitytype';
+		$af->max_length = 200;
+		$af->type = 'varchar';
+		$af->scale = null;
+		$af->not_null = true;
+		$af->primary_key = false;
+		$af->auto_increment = false;
+		$af->binary = false;
+		$af->unsigned = false;
+		$af->zerofill = false;
+		$af->has_default = false;
+		$at['ACTIVITYTYPE'] = $af;
+		$af = new ADOFieldObject();
+		$af->name = 'presence';
+		$af->max_length = -1;
+		$af->type = 'int';
+		$af->scale = null;
+		$af->not_null = true;
+		$af->primary_key = false;
+		$af->auto_increment = false;
+		$af->binary = false;
+		$af->unsigned = false;
+		$af->zerofill = false;
+		$af->has_default = true;
+		$af->default_value = 1;
+		$at['PRESENCE'] = $af;
+		$af = new ADOFieldObject();
+		$af->name = 'picklist_valueid';
+		$af->max_length = -1;
+		$af->type = 'int';
+		$af->scale = null;
+		$af->not_null = true;
+		$af->primary_key = false;
+		$af->auto_increment = false;
+		$af->binary = false;
+		$af->unsigned = false;
+		$af->zerofill = false;
+		$af->has_default = true;
+		$af->default_value = '0';
+		$at['PICKLIST_VALUEID'] = $af;
+		$af = new ADOFieldObject();
+		$av = array();
+		$af->name = 'activity_viewid';
+		$af->max_length = -1;
+		$af->type = 'int';
+		$af->scale = null;
+		$af->not_null = true;
+		$af->primary_key = true;
+		$af->auto_increment = true;
+		$af->binary = false;
+		$af->unsigned = false;
+		$af->zerofill = false;
+		$af->has_default = false;
+		$av['ACTIVITY_VIEWID'] = $af;
+		$af = new ADOFieldObject();
+		$af->name = 'activity_view';
+		$af->max_length = 200;
+		$af->type = 'varchar';
+		$af->scale = null;
+		$af->not_null = true;
+		$af->primary_key = false;
+		$af->auto_increment = false;
+		$af->binary = false;
+		$af->unsigned = false;
+		$af->zerofill = false;
+		$af->has_default = false;
+		$av['ACTIVITY_VIEW'] = $af;
+		$af = new ADOFieldObject();
+		$af->name = 'presence';
+		$af->max_length = -1;
+		$af->type = 'int';
+		$af->scale = null;
+		$af->not_null = true;
+		$af->primary_key = false;
+		$af->auto_increment = false;
+		$af->binary = false;
+		$af->unsigned = false;
+		$af->zerofill = false;
+		$af->has_default = true;
+		$af->default_value = 1;
+		$av['PRESENCE'] = $af;
+		$af = new ADOFieldObject();
+		$af->name = 'sortorderid';
+		$af->max_length = -1;
+		$af->type = 'int';
+		$af->scale = null;
+		$af->not_null = true;
+		$af->primary_key = false;
+		$af->auto_increment = false;
+		$af->binary = false;
+		$af->unsigned = false;
+		$af->zerofill = false;
+		$af->has_default = true;
+		$af->default_value = '0';
+		$av['SORTORDERID'] = $af;
+
+		return array(
+			array('vtiger_activitytype', $at),
+			array('vtiger_activity_view', $av),
 		);
 	}
 }

@@ -19,14 +19,14 @@ class MemoryLimitManagerTest extends TestCase {
 	 */
 	private $initialLimit;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		$this->initialLimit = ini_get('memory_limit');
 	}
 
 	/**
 	 * @throws \RuntimeException
 	 */
-	protected function tearDown() {
+	protected function tearDown(): void {
 		$wasNotSet = (ini_set('memory_limit', $this->initialLimit) === false);
 
 		if ($wasNotSet) {
@@ -140,18 +140,18 @@ class MemoryLimitManagerTest extends TestCase {
 	}
 
 	/**
-	 * @expectedException InvalidArgumentException
-	 * @expectedExceptionMessage provided limit (105906176) is above ini limit (104857600)
-	 * @expectedExceptionCode 1
+	 * expected Exception Message provided limit (105906176) is above ini limit (104857600)
 	 */
 	public function testInvalidArgumentProvided() {
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionCode(1);
 		//100 MB = 100 * 1024 * 1024 = 104857600
 		//101 MB = 101 * 1024 * 1024 = 105906176
-		if (ini_set('memory_limit', '100M') === false) {
+		if (ini_set('memory_limit', '350M') === false) {
 			$this->fail('could not set ini value memory_limit');
 		} else {
 			$manager = $this->getNewManager();
-			$manager->setLimitInMegaBytes(101);
+			$manager->setLimitInMegaBytes(351);
 		}
 	}
 

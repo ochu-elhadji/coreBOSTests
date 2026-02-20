@@ -29,6 +29,7 @@ coreBOS_Session::init();
 require_once 'vtlib/Vtiger/Module.php';
 require_once 'vtlib/Vtiger/Package.php';
 require_once 'vtlib/Vtiger/Net/Client.php';
+require_once 'data/VTEntityDelta.php';
 require_once 'modules/com_vtiger_workflow/include.inc';
 require_once 'modules/com_vtiger_workflow/tasks/VTEntityMethodTask.inc';
 require_once 'modules/com_vtiger_workflow/VTEntityMethodManager.inc';
@@ -38,7 +39,6 @@ require_once 'modules/Users/Users.php';
 require_once 'include/Webservices/State.php';
 require_once 'include/Webservices/OperationManagerEnDecode.php';
 require_once 'include/Webservices/OperationManager.php';
-require_once 'include/Webservices/SessionManager.php';
 require_once 'include/Webservices/WebserviceField.php';
 require_once 'include/Webservices/EntityMeta.php';
 require_once 'include/Webservices/VtigerWebserviceObject.php';
@@ -66,7 +66,8 @@ require_once 'modules/com_vtiger_workflow/VTWorkflowUtils.php';
 require_once 'modules/com_vtiger_workflow/expression_engine/include.inc';
 require_once 'modules/com_vtiger_workflow/WorkFlowScheduler.php';
 require_once 'include/utils/duplicate.php';
-global $current_user,$adb,$app_strings;
+require_once 'build/coreBOSTests/include/utils/SessionManagerStub.php';
+global $current_user,$adb,$app_strings,$theme;
 
 $current_user = Users::getActiveAdminUser();
 if (empty($current_language)) {
@@ -83,4 +84,5 @@ if (empty($current_language)) {
 if (empty($app_strings)) {
 	$app_strings = return_application_language($current_language);
 }
+$theme = 'softed';
 ?>

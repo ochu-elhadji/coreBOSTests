@@ -20,7 +20,7 @@
 include_once 'modules/com_vtiger_workflow/expression_functions/cbexpSQL.php';
 use PHPUnit\Framework\TestCase;
 
-class workflowfunctionsdatetimeTest extends TestCase {
+class datetimeTest extends TestCase {
 	/****
 	 * TEST Users decimal configuration
 	 * name format is: {decimal_separator}{symbol_position}{grouping}{grouping_symbol}{currency}
@@ -272,6 +272,31 @@ class workflowfunctionsdatetimeTest extends TestCase {
 		$sql = cbexpsql_networkdays(array($s,$e, ''), '');
 		$rdo = $adb->query($sql);
 		$this->assertEquals($expected, $adb->query_result($rdo, 0, 0));
+	}
+
+	/**
+	 * Method testisHolidayDate
+	 * @test
+	 */
+	public function testisHolidayDate() {
+		$actual = __cb_isHolidayDate(array('2021-06-20', 0, '2021-06-16, 2021-06-17, 2021-06-18, 2021-06-19, 2021-06-20'));
+		$this->assertEquals(true, $actual);
+		$actual = __cb_isHolidayDate(array('2021-07-24', 1, '2021-06-16, 2021-06-17, 2021-06-18, 2021-06-19, 2021-06-20'));
+		$this->assertEquals(true, $actual);
+		$actual = __cb_isHolidayDate(array('2021-06-16', 0, '2021-06-16, 2021-06-17, 2021-06-18, 2021-06-19, 2021-06-20'));
+		$this->assertEquals(true, $actual);
+		$actual = __cb_isHolidayDate(array('2021-06-15', 0, '2021-06-16, 2021-06-17, 2021-06-18, 2021-06-19, 2021-06-20'));
+		$this->assertEquals(false, $actual);
+		$actual = __cb_isHolidayDate(array('2021-06-11', 1));
+		$this->assertEquals(false, $actual);
+		$actual = __cb_isHolidayDate(array('', 1));
+		$this->assertEquals(false, $actual);
+		$actual = __cb_isHolidayDate(array('2021-06-11', 0));
+		$this->assertEquals(false, $actual);
+		$actual = __cb_isHolidayDate(array('2021-07-26', 1, '2021-06-16, 2021-06-17, 2021-06-18, 2021-06-19, 2021-06-20'));
+		$this->assertEquals(false, $actual);
+		$actual = __cb_isHolidayDate(array('2021-06-27', 0));
+		$this->assertEquals(true, $actual);
 	}
 
 	/**

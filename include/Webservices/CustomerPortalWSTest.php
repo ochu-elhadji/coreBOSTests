@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 include_once 'include/Webservices/CustomerPortalWS.php';
 
-class testCustomerPortalWS extends TestCase {
+class CustomerPortalWSTest extends TestCase {
 
 	/****
 	 * TEST Users decimal configuration
@@ -70,6 +70,7 @@ class testCustomerPortalWS extends TestCase {
 			'currency_symbol_placement' => '$1.0',
 			'roleid' => 'H2',
 			'rolename' => 'CEO',
+			'profileid' => array(1=>'Administrator'),
 		);
 		$this->assertEquals($expected, vtws_getPortalUserInfo($user), 'vtws_getPortalUserInfo admin');
 		$user = new Users();
@@ -88,6 +89,7 @@ class testCustomerPortalWS extends TestCase {
 			'currency_symbol_placement' => '$1.0',
 			'roleid' => 'H3',
 			'rolename' => 'Vice President',
+			'profileid' => array(6 => 'TestUserDefaultProfile'),
 		);
 		$this->assertEquals($expected, vtws_getPortalUserInfo($user), 'vtws_getPortalUserInfo testdmy');
 		$user = new Users();
@@ -106,6 +108,7 @@ class testCustomerPortalWS extends TestCase {
 			'currency_symbol_placement' => '$1.0',
 			'roleid' => 'H3',
 			'rolename' => 'Vice President',
+			'profileid' => array(6 => 'TestUserDefaultProfile'),
 		);
 		$this->assertEquals($expected, vtws_getPortalUserInfo($user), 'vtws_getPortalUserInfo testdmy');
 	}
@@ -116,20 +119,29 @@ class testCustomerPortalWS extends TestCase {
 	 */
 	public function getAssignedUserListProvider() {
 		$usersadmin = '[{"userid":"19x1","username":"Administrator"},{"userid":"19x11","username":"nocreate cbTest"},{"userid":"19x5","username":"cbTest testdmy"},{"userid":"19x8","username":"cbTest testes"},{"userid":"19x12","username":"cbTest testmcurrency"},{"userid":"19x6","username":"cbTest testmdy"},{"userid":"19x10","username":"cbTest testtz"},{"userid":"19x13","username":"cbTest testtz-3"},{"userid":"19x7","username":"cbTest testymd"}]';
+		$usrdota0x = '[{"userid":"19x11","username":"nocreate cbTest"},{"userid":"19x5","username":"cbTest testdmy"}]';
+		$usersHDAC = '{"HelpDesk":'.$usrdota0x.',"Accounts":'.$usersadmin.'}';
+		$usersHDACNoC = '{"HelpDesk":[{"userid":"19x11","username":"nocreate cbTest"}],"Accounts":'.$usersadmin.'}';
+		$usersHDACCT = '{"HelpDesk":'.$usrdota0x.',"Accounts":'.$usersadmin.',"Contacts":'.$usersadmin.'}';
 		return array(
 			array('HelpDesk', 1, $usersadmin),
 			array('DoesNotExist', 1, '[]'),
 			array('', 1, '[]'),
-			array('HelpDesk', $this->usrdota0x, $usersadmin),
+			array('HelpDesk', $this->usrdota0x, $usrdota0x),
 			array('DoesNotExist', $this->usrdota0x, '[]'),
 			array('', $this->usrdota0x, '[]'),
-			array('HelpDesk', $this->usrinactive, $usersadmin),
+			array('HelpDesk', $this->usrinactive, '[{"userid":"19x11","username":"nocreate cbTest"}]'),
 			array('DoesNotExist', $this->usrinactive, '[]'),
 			array('', $this->usrinactive, '[]'),
-			array('HelpDesk', $this->usrnocreate, $usersadmin),
+			array('HelpDesk', $this->usrnocreate, '[{"userid":"19x11","username":"nocreate cbTest"}]'),
 			array('cbTermConditions', $this->usrnocreate, '[]'),
 			array('DoesNotExist', $this->usrnocreate, '[]'),
 			array('', $this->usrnocreate, '[]'),
+			array('HelpDesk,Accounts', $this->usrdota0x, $usersHDAC),
+			array('HelpDesk,Accounts,Contacts', $this->usrdota0x, $usersHDACCT),
+			array('HelpDesk,Accounts', $this->usrnocreate, $usersHDACNoC),
+			array('HelpDesk,Accounts,cbTermConditions', $this->usrnocreate, $usersHDACNoC),
+			array('HelpDesk,Accounts,DoesNotExist', $this->usrnocreate, $usersHDACNoC),
 		);
 	}
 
@@ -139,9 +151,13 @@ class testCustomerPortalWS extends TestCase {
 	 * @dataProvider getAssignedUserListProvider
 	 */
 	public function testgetAssignedUserList($module, $userid, $expected) {
+		global $current_user;
+		$holdUser = $current_user;
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile($userid);
+		$current_user = $user;
 		$this->assertEquals($expected, vtws_getAssignedUserList($module, $user), 'getAssignedUserList');
+		$current_user = $holdUser;
 	}
 
 	/**
@@ -257,9 +273,10 @@ class testCustomerPortalWS extends TestCase {
 	/**
 	 * Method testchangePortalUserPassword
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testchangePortalUserPassword() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_OLD_PASSWORD');
 		$this->expectException(WebServiceException::class);
 		vtws_changePortalUserPassword("hackit'; select 1;", '$newPass', '5ub1ipv3');
 	}
@@ -267,9 +284,10 @@ class testCustomerPortalWS extends TestCase {
 	/**
 	 * Method testchangePortalUserPasswordWrongOldPassword
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testchangePortalUserPasswordWrongOldPassword() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_OLD_PASSWORD');
 		$this->expectException(WebServiceException::class);
 		vtws_changePortalUserPassword('julieta@yahoo.com', '$newPass', 'notoldpassword');
 	}
@@ -279,11 +297,12 @@ class testCustomerPortalWS extends TestCase {
 	 * params
 	 */
 	public function vtws_getReferenceValueProvider() {
+		$docfldwsid = vtws_getEntityId('DocumentFolders');
 		return array(
 			array(serialize(array('12x1084','11x74')), 'a:2:{s:7:"12x1084";a:3:{s:6:"module";s:8:"Contacts";s:9:"reference";s:15:"Lina Schwiebert";s:6:"cbuuid";s:40:"a609725772dc91ad733b19e4100cf68bb30195d1";}s:5:"11x74";a:3:{s:6:"module";s:8:"Accounts";s:9:"reference";s:15:"Chemex Labs Ltd";s:6:"cbuuid";s:40:"b0857db0c1dee95300a10982853f5fb1d4e981c1";}}'),
-			array(serialize(array('22x2','20x3','21x1')), 'a:3:{s:4:"22x2";a:3:{s:6:"module";s:15:"DocumentFolders";s:9:"reference";s:8:"Avengers";s:6:"cbuuid";s:0:"";}s:4:"20x3";a:3:{s:6:"module";s:6:"Groups";s:9:"reference";s:15:"Marketing Group";s:6:"cbuuid";s:0:"";}s:4:"21x1";a:3:{s:6:"module";s:8:"Currency";s:9:"reference";s:13:"Euro : &euro;";s:6:"cbuuid";s:0:"";}}'),
-			array(serialize(array('22x2|20x3','21x1')), 'a:3:{s:4:"22x2";a:3:{s:6:"module";s:15:"DocumentFolders";s:9:"reference";s:8:"Avengers";s:6:"cbuuid";s:0:"";}s:4:"20x3";a:3:{s:6:"module";s:6:"Groups";s:9:"reference";s:15:"Marketing Group";s:6:"cbuuid";s:0:"";}s:4:"21x1";a:3:{s:6:"module";s:8:"Currency";s:9:"reference";s:13:"Euro : &euro;";s:6:"cbuuid";s:0:"";}}'),
-			array(serialize(array('22x2','20x3|21x1')), 'a:3:{s:4:"22x2";a:3:{s:6:"module";s:15:"DocumentFolders";s:9:"reference";s:8:"Avengers";s:6:"cbuuid";s:0:"";}s:4:"20x3";a:3:{s:6:"module";s:6:"Groups";s:9:"reference";s:15:"Marketing Group";s:6:"cbuuid";s:0:"";}s:4:"21x1";a:3:{s:6:"module";s:8:"Currency";s:9:"reference";s:13:"Euro : &euro;";s:6:"cbuuid";s:0:"";}}'),
+			array(serialize(array($docfldwsid.'x44190','20x3','21x1')), 'a:3:{s:8:"'.$docfldwsid.'x44190";a:3:{s:6:"module";s:15:"DocumentFolders";s:9:"reference";s:8:"Avengers";s:6:"cbuuid";s:0:"";}s:4:"20x3";a:3:{s:6:"module";s:6:"Groups";s:9:"reference";s:15:"Marketing Group";s:6:"cbuuid";s:0:"";}s:4:"21x1";a:3:{s:6:"module";s:8:"Currency";s:9:"reference";s:13:"Euro : &euro;";s:6:"cbuuid";s:0:"";}}'),
+			array(serialize(array($docfldwsid.'x44190|20x3','21x1')), 'a:3:{s:8:"'.$docfldwsid.'x44190";a:3:{s:6:"module";s:15:"DocumentFolders";s:9:"reference";s:8:"Avengers";s:6:"cbuuid";s:0:"";}s:4:"20x3";a:3:{s:6:"module";s:6:"Groups";s:9:"reference";s:15:"Marketing Group";s:6:"cbuuid";s:0:"";}s:4:"21x1";a:3:{s:6:"module";s:8:"Currency";s:9:"reference";s:13:"Euro : &euro;";s:6:"cbuuid";s:0:"";}}'),
+			array(serialize(array($docfldwsid.'x44190','20x3|21x1')), 'a:3:{s:8:"'.$docfldwsid.'x44190";a:3:{s:6:"module";s:15:"DocumentFolders";s:9:"reference";s:8:"Avengers";s:6:"cbuuid";s:0:"";}s:4:"20x3";a:3:{s:6:"module";s:6:"Groups";s:9:"reference";s:15:"Marketing Group";s:6:"cbuuid";s:0:"";}s:4:"21x1";a:3:{s:6:"module";s:8:"Currency";s:9:"reference";s:13:"Euro : &euro;";s:6:"cbuuid";s:0:"";}}'),
 			array(serialize(array('11x1084','12x74')), 'a:2:{s:7:"11x1084";a:3:{s:6:"module";s:8:"Accounts";s:9:"reference";s:0:"";s:6:"cbuuid";s:0:"";}s:5:"12x74";a:3:{s:6:"module";s:8:"Contacts";s:9:"reference";s:0:"";s:6:"cbuuid";s:0:"";}}'),
 			array(serialize(array()), 'a:0:{}'),
 			array('', 'a:0:{}'),

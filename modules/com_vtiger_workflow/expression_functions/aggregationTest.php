@@ -19,7 +19,7 @@
  *************************************************************************************************/
 use PHPUnit\Framework\TestCase;
 
-class workflowfunctionsaggregationTest extends TestCase {
+class aggregationTest extends TestCase {
 
 	/**
 	 * Method testaggregationfunctions
@@ -101,6 +101,21 @@ class workflowfunctionsaggregationTest extends TestCase {
 		$this->assertEquals('Sean Cassidy,Garth (Other Realm)', $actual);
 		$actual = __cb_aggregation(array('group_concat','Invoice','subject separator ";"','',$entityData));
 		$this->assertEquals('Sean Cassidy;Garth (Other Realm)', $actual);
+		$actual = __cb_aggregation(array('group_concat','Invoice','account_id separator ";"name','',$entityData));
+		$this->assertEquals('Chemex Labs Ltd;Newton Clerk', $actual);
+		$actual = __cb_aggregation(array('group_concat','Invoice','contact_id separator ";"name','',$entityData));
+		$this->assertEquals('Maxima Brzozowski;Carmen Gillham', $actual);
+		$actual = __cb_aggregation(array('group_concat','Invoice','contact_id separator "\r\n"','',$entityData));
+		$this->assertEquals("1610\r\n1291", $actual);
+		$actual = __cb_aggregation(array('group_concat','Invoice','contact_id separator "\n"','',$entityData));
+		$this->assertEquals("1610\n1291", $actual);
+		$actual = __cb_aggregation(array('group_concat','Invoice','contact_id separator "\r"','',$entityData));
+		$this->assertEquals("1610\r1291", $actual);
+
+		$actual = __cb_aggregation(array('group_concat','Invoice','contact_id separator "newline"','',$entityData));
+		$this->assertEquals("1610\r\n1291", $actual);
+		$actual = __cb_aggregation(array('group_concat','Invoice','account_id separator "newline"','',$entityData));
+		$this->assertEquals("74\r\n141", $actual);
 		////////////////
 		$currentModule = 'Potentials';
 		$entityData = $entityCache->forId('13x5900'); // Egestas Aliquam Fringilla Corp potential
@@ -121,6 +136,40 @@ class workflowfunctionsaggregationTest extends TestCase {
 		$actual = __cb_aggregation(array('sum','Potentials','inexistentfield','',$entityData));
 		$this->assertEquals(0, $actual, 'unknown field');
 		$currentModule = $holdModule;
+	}
+
+	/**
+	 * Method testaggregationExpressionfunctions
+	 * @test
+	 */
+	public function testaggregationExpressionfunctions() {
+		global $current_user, $currentModule;
+		$holdModule = $currentModule;
+		$currentModule = 'Invoice';
+		$entityCache = new VTEntityCache($current_user);
+		$entityData = $entityCache->forId('11x74');
+		$actual = __cb_aggregation(array('sum','Quotes','hdnSubTotal','[bill_code,n,randomstring(12),or,expression]',$entityData));
+		$this->assertEquals(3854.100000, $actual);
+		$actual = __cb_aggregation(array('sum','Potentials','amount','[amount,l,average(71000, 73000),or,expression]',$entityData));
+		$this->assertEquals(70134.000000, $actual);
+		$actual = __cb_aggregation(array('sum','Potentials','amount','[sales_stage,e,uppercasefirst(\'closed Lost\'),or,expression]',$entityData));
+		$this->assertEquals(72100.000000, $actual);
+		$actual = __cb_aggregation(array('sum','Potentials','amount','[sales_stage,e,concat(\'Closed\',\' \', \'Lost\'),or,expression]',$entityData));
+		$this->assertEquals(72100.000000, $actual);
+		$entityData = $entityCache->forId('10x4196');
+		$actual = __cb_aggregation(array('sum','Leads','annualrevenue','[annualrevenue,e,annualrevenue]',$entityData));
+		$this->assertEquals(16379925.000000, $actual);
+		$actual = __cb_aggregation(array('sum','Leads','annualrevenue','[id,n,id]',$entityData));
+		$this->assertEquals(7902796955.000000, $actual);
+		$actual = __cb_aggregation(array('sum','Leads','annualrevenue','[id,e,id]',$entityData));
+		$this->assertEquals(16379925.000000, $actual);
+		$entityData = $entityCache->forId('11x74');
+		$actual = __cb_aggregation(array('sum','Accounts','employees','[id,e,id]',$entityData));
+		$this->assertEquals(131, $actual);
+		$actual = __cb_aggregation(array('sum','Accounts','employees','[id,n,id]',$entityData));
+		$this->assertEquals(113710, $actual);
+		$actual = __cb_aggregation(array('sum','Accounts','employees','[id,n,74]',$entityData));
+		$this->assertEquals(113710, $actual);
 	}
 
 	/**

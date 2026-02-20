@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 include_once 'include/Webservices/ProcessMap.php';
 
-class testWSProcessMap extends TestCase {
+class ProcessMapTest extends TestCase {
 
 	/**
 	 * Method testInstance
@@ -49,7 +49,7 @@ class testWSProcessMap extends TestCase {
 			'outfields' => array(),
 		);
 		$actual = cbwsProcessMap(vtws_getEntityId('cbMap').'x34030', $params, $current_user);
-		$expected = array('amount' => '4572.810000');
+		$expected = array('amount' => '4572.810000', 'reference' => 'Acquired ---');
 		$this->assertEquals($expected, $actual, 'cbwsProcessMap');
 		///////////////
 		$params = array(
@@ -65,7 +65,7 @@ class testWSProcessMap extends TestCase {
 			'amount' => '4572.810000',
 			'assigned_user_id' => '8',
 			'cyp_no' => 'PAY-0000008',
-			'reference' => 'Grace Darling',
+			'reference' => 'Acquired ---',
 			'parent_id' => '152',
 			'related_id' => '3250',
 			'register' => '2015-07-22',
@@ -101,7 +101,7 @@ class testWSProcessMap extends TestCase {
 			'amount' => '4572.810000',
 			'assigned_user_id' => '8',
 			'cyp_no' => 'PAY-0000008',
-			'reference' => 'Grace Darling',
+			'reference' => 'Acquired ---',
 			'parent_id' => '152',
 			'related_id' => '3250',
 			'register' => '2015-07-22',
@@ -140,7 +140,7 @@ class testWSProcessMap extends TestCase {
 		$expected = array(
 			'assigned_user_id' => '8',
 			'cyp_no' => 'PAY-0000008',
-			'reference' => 'Grace Darling',
+			'reference' => 'Acquired ---',
 			'parent_id' => '152',
 			'record_id' => vtws_getEntityId('CobroPago').'x14301',
 			'amount' => '4572.810000',
@@ -151,7 +151,6 @@ class testWSProcessMap extends TestCase {
 	/**
 	 * Method testnonsupportedmap
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnonsupportedmap() {
 		global $current_user;
@@ -163,7 +162,6 @@ class testWSProcessMap extends TestCase {
 	/**
 	 * Method testinvalidmoduleexception
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testinvalidmoduleexception() {
 		global $current_user;
@@ -175,7 +173,6 @@ class testWSProcessMap extends TestCase {
 	/**
 	 * Method testReadExceptionNoPermission
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testReadExceptionNoPermission() {
 		global $current_user;
@@ -196,7 +193,6 @@ class testWSProcessMap extends TestCase {
 	/**
 	 * Method testInvalidIDExceptionMissinginfields
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testInvalidIDExceptionMissinginfields() {
 		global $current_user;
@@ -212,7 +208,6 @@ class testWSProcessMap extends TestCase {
 	/**
 	 * Method testInvalidIDExceptionMissingrecord
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testInvalidIDExceptionMissingrecord() {
 		global $current_user;

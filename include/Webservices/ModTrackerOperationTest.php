@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 include_once 'include/Webservices/ModTrackerOperation.php';
 
-class testWSModTrackerOperation extends TestCase {
+class ModTrackerOperationTest extends TestCase {
 
 	/**
 	 * Method testInstance
@@ -49,7 +49,7 @@ class testWSModTrackerOperation extends TestCase {
 			'crmid' => '11x74',
 			'module' => 'Accounts',
 			'whodid' => '19x1',
-			'changedon' => '2016-03-15 14:40:50',
+			'changedon' => '2016-03-15 14:40:50.000000',
 			'status' => '0',
 			'fieldname' => 'cf_732',
 			'prevalue' => '',
@@ -73,7 +73,7 @@ class testWSModTrackerOperation extends TestCase {
 				'crmid' => '11x74',
 				'module' => 'Accounts',
 				'whodid' => '19x1',
-				'changedon' => '2016-03-15 14:40:50',
+				'changedon' => '2016-03-15 14:40:50.000000',
 				'status' => '0',
 				'fieldname' => 'cf_732',
 				'prevalue' => '',
@@ -84,7 +84,7 @@ class testWSModTrackerOperation extends TestCase {
 				'crmid' => '12x1094',
 				'module' => 'Contacts',
 				'whodid' => '19x1',
-				'changedon' => '2016-04-02 18:14:42',
+				'changedon' => '2016-04-02 18:14:42.000000',
 				'status' => '2',
 				'fieldname' => 'account_id',
 				'prevalue' => '84',
@@ -97,7 +97,6 @@ class testWSModTrackerOperation extends TestCase {
 	/**
 	 * Method testRetrieveNotFound
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testRetrieveNotFound() {
 		global $current_user, $adb, $log;
@@ -136,7 +135,7 @@ class testWSModTrackerOperation extends TestCase {
 				'crmid' => '11x113',
 				'module' => 'Accounts',
 				'whodid' => '19x1',
-				'changedon' => '2017-07-06 23:35:21',
+				'changedon' => '2017-07-06 23:35:21.000000',
 				'status' => '2',
 				'fieldname' => 'assigned_user_id',
 				'prevalue' => '10',
@@ -147,7 +146,7 @@ class testWSModTrackerOperation extends TestCase {
 				'crmid' => '11x113',
 				'module' => 'Accounts',
 				'whodid' => '19x1',
-				'changedon' => '2017-07-06 23:35:21',
+				'changedon' => '2017-07-06 23:35:21.000000',
 				'status' => '2',
 				'fieldname' => 'cf_719',
 				'prevalue' => '',
@@ -158,7 +157,7 @@ class testWSModTrackerOperation extends TestCase {
 				'crmid' => '11x113',
 				'module' => 'Accounts',
 				'whodid' => '19x1',
-				'changedon' => '2017-07-06 23:35:21',
+				'changedon' => '2017-07-06 23:35:21.000000',
 				'status' => '2',
 				'fieldname' => 'cf_720',
 				'prevalue' => '',
@@ -169,7 +168,7 @@ class testWSModTrackerOperation extends TestCase {
 				'crmid' => '11x113',
 				'module' => 'Accounts',
 				'whodid' => '19x1',
-				'changedon' => '2017-07-06 23:35:21',
+				'changedon' => '2017-07-06 23:35:21.000000',
 				'status' => '2',
 				'fieldname' => 'cf_721',
 				'prevalue' => '',
@@ -180,7 +179,7 @@ class testWSModTrackerOperation extends TestCase {
 				'crmid' => '11x113',
 				'module' => 'Accounts',
 				'whodid' => '19x1',
-				'changedon' => '2017-07-06 23:35:21',
+				'changedon' => '2017-07-06 23:35:21.000000',
 				'status' => '2',
 				'fieldname' => 'cf_728',
 				'prevalue' => '',
@@ -194,7 +193,6 @@ class testWSModTrackerOperation extends TestCase {
 	/**
 	 * Method testIncorrectQuerySyntax
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testIncorrectQuerySyntax() {
 		global $current_user, $adb, $log;
@@ -208,7 +206,6 @@ class testWSModTrackerOperation extends TestCase {
 	/**
 	 * Method testIncorrectQueryID
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testIncorrectQueryID() {
 		global $current_user, $adb, $log;
@@ -255,51 +252,100 @@ class testWSModTrackerOperation extends TestCase {
 					'type' => array(
 						'name' => 'reference',
 						'refersTo' => array(
-							0 => 'Assets',
-							1 => 'BusinessActions',
-							2 => 'cbMap',
-							3 => 'cbQuestion',
-							4 => 'Campaigns',
-							5 => 'ModComments',
-							6 => 'cbCompany',
-							7 => 'Contacts',
-							8 => 'cbupdater',
-							9 => 'cbCredentials',
-							10 => 'Documents',
-							11 => 'Faq',
-							12 => 'GlobalVariable',
-							13 => 'InventoryDetails',
-							14 => 'Invoice',
-							15 => 'Leads',
-							16 => 'MsgTemplate',
-							17 => 'Messages',
-							18 => 'Potentials',
-							19 => 'Accounts',
-							20 => 'CobroPago',
-							21 => 'PBXManager',
-							22 => 'PriceBooks',
-							23 => 'ProductComponent',
-							24 => 'Products',
-							25 => 'ProjectMilestone',
-							26 => 'ProjectTask',
-							27 => 'Project',
-							28 => 'cbPulse',
-							29 => 'PurchaseOrder',
-							30 => 'Quotes',
-							31 => 'SalesOrder',
-							32 => 'ServiceContracts',
-							33 => 'Services',
-							34 => 'SMSNotifier',
-							35 => 'HelpDesk',
-							36 => 'cbSurveyQuestion',
-							37 => 'cbSurvey',
-							38 => 'cbSurveyAnswer',
-							39 => 'cbSurveyDone',
-							40 => 'cbTermConditions',
-							41 => 'cbCalendar',
-							42 => 'cbtranslation',
-							43 => 'Vendors',
-							44 => 'cbCVManagement',
+							'Assets',
+							'AutoNumberPrefix',
+							'BusinessActions',
+							'cbMap',
+							'cbQuestion',
+							'Campaigns',
+							'ModComments',
+							'cbCompany',
+							'Contacts',
+							'cbupdater',
+							'cbCredentials',
+							'DocumentFolders',
+							'Documents',
+							'Faq',
+							'GlobalVariable',
+							'InventoryDetails',
+							'Invoice',
+							'Leads',
+							'MsgTemplate',
+							'Messages',
+							'Potentials',
+							'Accounts',
+							'CobroPago',
+							'PBXManager',
+							'PriceBooks',
+							'pricebookproductrel',
+							'ProductComponent',
+							'Products',
+							'ProjectMilestone',
+							'ProjectTask',
+							'Project',
+							'cbPulse',
+							'PurchaseOrder',
+							'Quotes',
+							'SalesOrder',
+							'ServiceContracts',
+							'Services',
+							'SMSNotifier',
+							'HelpDesk',
+							'cbSurveyQuestion',
+							'cbSurvey',
+							'cbSurveyAnswer',
+							'cbSurveyDone',
+							'cbTermConditions',
+							'cbCalendar',
+							'cbtranslation',
+							'Vendors',
+							'cbCVManagement',
+						),
+						'picklistValues' => array(
+							array(
+								'value' => '22x11',
+								'label' => 'Application Templates',
+							),
+							array(
+								'value' => '22x2',
+								'label' => 'Avengers',
+							),
+							array(
+								'value' => '22x1',
+								'label' => 'Default',
+							),
+							array(
+								'value' => '22x10',
+								'label' => 'Excalibur',
+							),
+							array(
+								'value' => '22x6',
+								'label' => 'Fantastic Four',
+							),
+							array(
+								'value' => '22x7',
+								'label' => 'Guardians',
+							),
+							array(
+								'value' => '22x8',
+								'label' => 'Omega Flight',
+							),
+							array(
+								'value' => '22x9',
+								'label' => 'S.H.I.E.L.D.',
+							),
+							array(
+								'value' => '22x4',
+								'label' => 'The Defenders',
+							),
+							array(
+								'value' => '22x5',
+								'label' => 'The Invaders',
+							),
+							array(
+								'value' => '22x3',
+								'label' => 'X-Men',
+							),
 						),
 					),
 					'nullable' => true,
@@ -351,7 +397,7 @@ class testWSModTrackerOperation extends TestCase {
 					'label_raw' => 'fieldname',
 					'mandatory' => false,
 					'type' => array('name' => 'string'),
-					'nullable' => true,
+					'nullable' => false,
 					'editable' => true,
 				),
 				array(
@@ -400,7 +446,6 @@ class testWSModTrackerOperation extends TestCase {
 	/**
 	 * Method testCreateException
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testCreateException() {
 		global $current_user, $adb, $log;
@@ -414,7 +459,6 @@ class testWSModTrackerOperation extends TestCase {
 	/**
 	 * Method testUpdateException
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testUpdateException() {
 		global $current_user, $adb, $log;
@@ -428,7 +472,6 @@ class testWSModTrackerOperation extends TestCase {
 	/**
 	 * Method testReviseException
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testReviseException() {
 		global $current_user, $adb, $log;
@@ -442,7 +485,6 @@ class testWSModTrackerOperation extends TestCase {
 	/**
 	 * Method testDeleteException
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testDeleteException() {
 		global $current_user, $adb, $log;

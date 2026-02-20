@@ -19,7 +19,7 @@
  *************************************************************************************************/
 use PHPUnit\Framework\TestCase;
 
-class testCRMEntity extends TestCase {
+class CRMEntityTest extends TestCase {
 
 	/****
 	 * TEST Users
@@ -171,7 +171,7 @@ class testCRMEntity extends TestCase {
 		$actual = CRMEntity::getUUIDfromWSID('20x3');
 		$this->assertEquals('', $actual, 'getUUIDfromWSID Group');
 		$actual = CRMEntity::getUUIDfromWSID('22x2');
-		$this->assertEquals('', $actual, 'getUUIDfromWSID Document Folder');
+		$this->assertEquals('efb97a8a13696e0b54cb2d8ff52337987bdbc06d', $actual, 'getUUIDfromWSID Document Folder');
 		$actual = CRMEntity::getUUIDfromWSID('');
 		$this->assertEquals('', $actual, 'getUUIDfromWSID Empty');
 		$actual = CRMEntity::getWSIDfromUUID('');
@@ -390,5 +390,35 @@ class testCRMEntity extends TestCase {
 		$this->assertEquals(false, $crmentity->checkIfCustomTableExists('doesnotexist'));
 		$this->assertEquals(false, $crmentity->checkIfCustomTableExists('does not exist'));
 		$this->assertEquals(false, $crmentity->checkIfCustomTableExists(''));
+	}
+
+	/**
+	 * Method testsanitizeOwnerField
+	 * @test
+	 */
+	public function testsanitizeOwnerField() {
+		global $current_user;
+		$defaultCurrent = true;
+		$crmentity = CRMEntity::getInstance('Accounts');
+		$this->assertEquals(5, $crmentity->sanitizeOwnerField('19x5', $defaultCurrent));
+		$this->assertEquals(4, $crmentity->sanitizeOwnerField('20x4', $defaultCurrent));
+		$this->assertEquals(5, $crmentity->sanitizeOwnerField('5', $defaultCurrent));
+		$this->assertEquals(4, $crmentity->sanitizeOwnerField('4', $defaultCurrent));
+		// this nextone is not a user, this function does not check if the ID is a user, just the format (WSID)
+		$this->assertEquals(74, $crmentity->sanitizeOwnerField('74', $defaultCurrent));
+		$this->assertEquals($current_user->id, $crmentity->sanitizeOwnerField('0', $defaultCurrent));
+		$this->assertEquals(0, $crmentity->sanitizeOwnerField('0', false));
+	}
+
+	/**
+	 * Method testsanitizeOwnerFieldInvalid
+	 * @test
+	 */
+	public function testsanitizeOwnerFieldInvalid() {
+		$this->expectException(UnexpectedValueException::class);
+		$this->expectExceptionCode(1);
+		$crmentity = CRMEntity::getInstance('Accounts');
+		TerminateExecution::setThrowException(true);
+		$this->assertEquals(false, $crmentity->sanitizeOwnerField('11x74', true));
 	}
 }

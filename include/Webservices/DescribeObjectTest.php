@@ -20,7 +20,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-class testWSDescribe extends TestCase {
+class DescribeObjectTest extends TestCase {
 
 	private $asset = array(
 		'label' => 'Assets',
@@ -52,6 +52,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			1 => array(
 				'name' => 'product',
@@ -77,6 +78,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			2 => array(
 				'name' => 'serialnumber',
@@ -99,6 +101,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			3 => array(
 				'name' => 'assigned_user_id',
@@ -185,6 +188,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			4 => array(
 				'name' => 'datesold',
@@ -210,6 +214,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			5 => array(
 				'name' => 'dateinservice',
@@ -235,6 +240,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			6 => array(
 				'name' => 'assetstatus',
@@ -246,10 +252,12 @@ class testWSDescribe extends TestCase {
 						0 => array(
 							'label' => 'In Service',
 							'value' => 'In Service',
+							'tooltip' => '',
 						),
 						1 => array(
 							'label' => 'Out-of-service',
 							'value' => 'Out-of-service',
+							'tooltip' => '',
 						),
 					),
 					'defaultValue' => 'In Service',
@@ -269,7 +277,8 @@ class testWSDescribe extends TestCase {
 					'blocklabel' => 'LBL_ASSET_INFORMATION',
 					'blockname' => 'Asset Information',
 				),
-				'default' => '',
+				'default' => 'In Service',
+				'helpinfo' => '',
 			),
 			7 => array(
 				'name' => 'tagnumber',
@@ -292,6 +301,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			8 => array(
 				'name' => 'invoiceid',
@@ -317,6 +327,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			9 => array(
 				'name' => 'shippingmethod',
@@ -339,6 +350,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			10 => array(
 				'name' => 'shippingtrackingnumber',
@@ -361,6 +373,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			11 => array(
 				'name' => 'assetname',
@@ -375,7 +388,7 @@ class testWSDescribe extends TestCase {
 				'sequence' => '12',
 				'quickcreate' => false,
 				'displaytype' => '1',
-				'summary' => 'T',
+				'summary' => 'B',
 				'block' => array(
 					'blockid' => '103',
 					'blocksequence' => '1',
@@ -383,6 +396,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			12 => array(
 				'name' => 'account',
@@ -408,6 +422,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			13 => array(
 				'name' => 'createdtime',
@@ -430,6 +445,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			14 => array(
 				'name' => 'modifiedtime',
@@ -452,6 +468,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			15 => array(
 				'name' => 'modifiedby',
@@ -477,6 +494,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			16 => array(
 				'name' => 'created_user_id',
@@ -502,6 +520,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Asset Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			17 => array(
 				'name' => 'description',
@@ -524,6 +543,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Notes',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			18 => array(
 				'name' => 'id',
@@ -534,6 +554,13 @@ class testWSDescribe extends TestCase {
 				'nullable' => false,
 				'editable' => false,
 				'default' => '',
+				'uitype' => 7,
+				'helpinfo' => '',
+				'typeofdata' => 'V~O',
+				'sequence' => 0,
+				'quickcreate' => true,
+				'displaytype' => 0,
+				'summary' => 'N',
 			),
 		),
 		'idPrefix' => '29',
@@ -548,6 +575,7 @@ class testWSDescribe extends TestCase {
 			),
 			'linkfields' => array( 0 => 'assetname'),
 			'pagesize' => 40,
+			'relatedfields' => array(),
 		),
 		'relatedModules' => array(
 			'HelpDesk' => array(
@@ -570,6 +598,7 @@ class testWSDescribe extends TestCase {
 					),
 					'linkfields' => array( 0 => 'ticket_title'),
 					'pagesize' => 40,
+					'relatedfields' => array(),
 				),
 			),
 			'Documents' => array(
@@ -591,6 +620,7 @@ class testWSDescribe extends TestCase {
 					),
 					'linkfields' => array( 0 => 'notes_title'),
 					'pagesize' => 40,
+					'relatedfields' => array(),
 				),
 			),
 		),
@@ -629,6 +659,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			1 => array(
 				'name' => 'faq_no',
@@ -653,6 +684,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			2 => array(
 				'name' => 'faqstatus',
@@ -664,18 +696,22 @@ class testWSDescribe extends TestCase {
 						0 => array(
 							'label' => 'Draft',
 							'value' => 'Draft',
+							'tooltip' => '',
 						),
 						1 => array(
 							'label' => 'Reviewed',
 							'value' => 'Reviewed',
+							'tooltip' => '',
 						),
 						2 => array(
 							'label' => 'Published',
 							'value' => 'Published',
+							'tooltip' => '',
 						),
 						3 => array(
 							'label' => 'Obsolete',
 							'value' => 'Obsolete',
+							'tooltip' => '',
 						),
 					),
 					'defaultValue' => 'Draft',
@@ -696,6 +732,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			3 => array(
 				'name' => 'faqcategories',
@@ -707,18 +744,22 @@ class testWSDescribe extends TestCase {
 						array(
 							'label' => 'General',
 							'value' => 'General',
-						),
-						array(
-							'label' => 'Website',
-							'value' => 'Website',
-						),
-						array(
-							'label' => 'Testing',
-							'value' => 'Testing',
+							'tooltip' => '',
 						),
 						array(
 							'label' => 'Others',
 							'value' => 'Others',
+							'tooltip' => '',
+						),
+						array(
+							'label' => 'Testing',
+							'value' => 'Testing',
+							'tooltip' => '',
+						),
+						array(
+							'label' => 'Website',
+							'value' => 'Website',
+							'tooltip' => '',
 						),
 					),
 					'defaultValue' => 'General',
@@ -739,6 +780,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			4 => array(
 				'name' => 'createdtime',
@@ -761,6 +803,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			5 => array(
 				'name' => 'modifiedtime',
@@ -783,6 +826,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			6 => array(
 				'name' => 'question',
@@ -799,7 +843,7 @@ class testWSDescribe extends TestCase {
 				'sequence' => '7',
 				'quickcreate' => false,
 				'displaytype' => '1',
-				'summary' => 'T',
+				'summary' => 'B',
 				'block' => array(
 					'blockid' => '37',
 					'blocksequence' => '1',
@@ -807,6 +851,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			7 => array(
 				'name' => 'modifiedby',
@@ -832,6 +877,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			8 => array(
 				'name' => 'faq_answer',
@@ -854,6 +900,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			9 => array(
 				'name' => 'created_user_id',
@@ -879,6 +926,7 @@ class testWSDescribe extends TestCase {
 					'blockname' => 'Faq Information',
 				),
 				'default' => '',
+				'helpinfo' => '',
 			),
 			10 => array(
 				'name' => 'id',
@@ -889,6 +937,13 @@ class testWSDescribe extends TestCase {
 				'nullable' => false,
 				'editable' => false,
 				'default' => '',
+				'uitype' => 7,
+				'helpinfo' => '',
+				'typeofdata' => 'V~O',
+				'sequence' => 0,
+				'quickcreate' => true,
+				'displaytype' => 0,
+				'summary' => 'N',
 			),
 		),
 		'idPrefix' => '3',
@@ -905,6 +960,7 @@ class testWSDescribe extends TestCase {
 			),
 			'linkfields' => array( 0 => 'question'),
 			'pagesize' => 40,
+			'relatedfields' => array(),
 		),
 		'relatedModules' => array(
 			'Documents' => array(
@@ -926,6 +982,7 @@ class testWSDescribe extends TestCase {
 					),
 					'linkfields' => array( 0 => 'notes_title'),
 					'pagesize' => 40,
+					'relatedfields' => array(),
 				),
 			),
 		),
@@ -958,7 +1015,7 @@ class testWSDescribe extends TestCase {
 			'Assets' => $this->asset,
 			'Faq' => $this->faq,
 		);
-		$this->assertEqualsCanonicalizing($expected, $actual);
+		$this->assertEquals($expected, $actual);
 	}
 
 	/**
@@ -1094,10 +1151,11 @@ class testWSDescribe extends TestCase {
 	/**
 	 * Method testemptymodule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testemptymodule() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$this->expectException(WebServiceException::class);
 		$this->expectExceptionCode(WebServiceErrorCode::$ACCESSDENIED);
 		vtws_describe('', $current_user);
@@ -1106,9 +1164,10 @@ class testWSDescribe extends TestCase {
 	/**
 	 * Method testnopermissiononemodule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnopermissiononemodule() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(11); // nocreate
 		$this->expectException(WebServiceException::class);
@@ -1149,7 +1208,7 @@ class testWSDescribe extends TestCase {
 			'Assets' => $expa,
 			'Faq' => $expf,
 		);
-		$this->assertEqualsCanonicalizing($expected, $actual);
+		$this->assertEquals($expected, $actual);
 	}
 }
 ?>

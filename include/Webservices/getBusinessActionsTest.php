@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 include_once 'include/Webservices/getBusinessActions.php';
 
-class testWSgetBusinessActions extends TestCase {
+class getBusinessActionsTest extends TestCase {
 
 	private function stripLinkID($array) {
 		foreach ($array as $types => $tinfo) {
@@ -52,6 +52,9 @@ class testWSgetBusinessActions extends TestCase {
 				'handler_class' => '',
 				'handler' => '',
 				'onlyonmymodule' => '0',
+				'widget_header' => '',
+				'widget_width' => '',
+				'widget_height' => '',
 			))),
 			'HEADERSCRIPT' => array(),
 			'HEADERCSS' => array(),
@@ -74,6 +77,9 @@ class testWSgetBusinessActions extends TestCase {
 				'handler_class' => 'ModTracker',
 				'handler' => 'isViewPermitted',
 				'onlyonmymodule' => '0',
+				'widget_header' => '',
+				'widget_width' => '',
+				'widget_height' => '',
 			))),
 			'HEADERSCRIPT' => array(),
 			'HEADERCSS' => array(),
@@ -93,19 +99,9 @@ class testWSgetBusinessActions extends TestCase {
 					'handler_class' => '',
 					'handler' => '',
 					'onlyonmymodule' => '0',
-				)),
-				BusinessActions::convertToObject(4, array(
-					'businessactionsid' => '44123',
-					'elementtype_action' => 'LISTVIEWBASIC',
-					'linklabel' => 'Mass Tag',
-					'linkurl' => 'javascript:showMassTag();',
-					'linkicon' => '',
-					'sequence' => '0',
-					'status' => false,
-					'handler_path' => '',
-					'handler_class' => '',
-					'handler' => '',
-					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				)),
 				BusinessActions::convertToObject(4, array(
 					'businessactionsid' => '44124',
@@ -119,6 +115,25 @@ class testWSgetBusinessActions extends TestCase {
 					'handler_class' => '',
 					'handler' => '',
 					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
+				)),
+				BusinessActions::convertToObject(4, array(
+					'businessactionsid' => '44124',
+					'elementtype_action' => 'LISTVIEWBASIC',
+					'linklabel' => 'Mass Tag',
+					'linkurl' => "javascript:showMassTag();",
+					'linkicon' => '',
+					'sequence' => '0',
+					'status' => false,
+					'handler_path' => '',
+					'handler_class' => '',
+					'handler' => '',
+					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				))
 			),
 			'HEADERSCRIPT' => array(BusinessActions::convertToObject(4, array(
@@ -133,6 +148,9 @@ class testWSgetBusinessActions extends TestCase {
 				'handler_class' => '',
 				'handler' => '',
 				'onlyonmymodule' => '1',
+				'widget_header' => '0',
+				'widget_width' => '',
+				'widget_height' => '',
 			))),
 			'HEADERCSS' => array(),
 		));
@@ -150,6 +168,9 @@ class testWSgetBusinessActions extends TestCase {
 					'handler_class' => '',
 					'handler' => '',
 					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				)),
 				BusinessActions::convertToObject(4, array(
 					'businessactionsid' => '44115',
@@ -163,12 +184,15 @@ class testWSgetBusinessActions extends TestCase {
 					'handler_class' => '',
 					'handler' => '',
 					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				)),
 				BusinessActions::convertToObject(4, array(
 					'businessactionsid' => '44116',
 					'elementtype_action' => 'DETAILVIEWBASIC',
 					'linklabel' => 'LBL_SHOW_CONTACT_HIERARCHY',
-					'linkurl' => 'index.php?module=Contacts&action=ContactHierarchy&contactid=1494',
+					'linkurl' => 'index.php?module=Contacts&action=Hierarchy&recordid=1494',
 					'linkicon' => 'themes/images/hierarchy_color16.png',
 					'sequence' => '0',
 					'status' => false,
@@ -176,6 +200,9 @@ class testWSgetBusinessActions extends TestCase {
 					'handler_class' => '',
 					'handler' => '',
 					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				)),
 				BusinessActions::convertToObject(4, array(
 					'businessactionsid' => '44117',
@@ -189,6 +216,9 @@ class testWSgetBusinessActions extends TestCase {
 					'handler_class' => 'ModTracker',
 					'handler' => 'isViewPermitted',
 					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				)),
 				BusinessActions::convertToObject(4, array(
 					'businessactionsid' => '44118',
@@ -202,6 +232,9 @@ class testWSgetBusinessActions extends TestCase {
 					'handler_class' => '',
 					'handler' => '',
 					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				)),
 				BusinessActions::convertToObject(4, array(
 					'businessactionsid' => '44119',
@@ -215,6 +248,9 @@ class testWSgetBusinessActions extends TestCase {
 					'handler_class' => '',
 					'handler' => '',
 					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				)),
 			),
 			'HEADERSCRIPT' => array(BusinessActions::convertToObject(4, array(
@@ -229,6 +265,9 @@ class testWSgetBusinessActions extends TestCase {
 				'handler_class' => '',
 				'handler' => '',
 				'onlyonmymodule' => '1',
+				'widget_header' => '0',
+				'widget_width' => '',
+				'widget_height' => '',
 			))),
 			'HEADERCSS' => array(),
 			'DETAILVIEWWIDGET' => array(
@@ -238,12 +277,15 @@ class testWSgetBusinessActions extends TestCase {
 					'linklabel' => 'DetailViewBlockCommentWidget',
 					'linkurl' => 'block://ModComments:modules/ModComments/ModComments.php',
 					'linkicon' => '',
-					'sequence' => '0',
+					'sequence' => '1',
 					'status' => false,
 					'handler_path' => '',
 					'handler_class' => '',
 					'handler' => '',
 					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				)),
 				BusinessActions::convertToObject(4, array(
 					'businessactionsid' => '44120',
@@ -251,12 +293,15 @@ class testWSgetBusinessActions extends TestCase {
 					'linklabel' => 'PortalUserPasswordManagement',
 					'linkurl' => 'module=Contacts&action=ContactsAjax&file=PortalUserPasswordManagement&recordid=1494',
 					'linkicon' => '',
-					'sequence' => '0',
+					'sequence' => '1',
 					'status' => false,
 					'handler_path' => '',
 					'handler_class' => '',
 					'handler' => '',
 					'onlyonmymodule' => '0',
+					'widget_header' => '0',
+					'widget_width' => '',
+					'widget_height' => '',
 				)),
 			),
 		));
@@ -272,12 +317,15 @@ class testWSgetBusinessActions extends TestCase {
 				'linklabel' => 'Document actions',
 				'linkurl' => 'module=Documents&action=DocumentsAjax&file=documentsWidget&record='.$docid,
 				'linkicon' => '',
-				'sequence' => '0',
+				'sequence' => '1',
 				'status' => false,
 				'handler_path' => '',
 				'handler_class' => '',
 				'handler' => '',
 				'onlyonmymodule' => '0',
+				'widget_header' => '',
+				'widget_width' => '',
+				'widget_height' => '',
 			))),
 		));
 		$views = array(
@@ -333,7 +381,6 @@ class testWSgetBusinessActions extends TestCase {
 	/**
 	 * Method testactormodule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testactormodule() {
 		global $current_user;
@@ -345,7 +392,6 @@ class testWSgetBusinessActions extends TestCase {
 	/**
 	 * Method testnonentitymodule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnonentitymodule() {
 		global $current_user;
@@ -357,7 +403,6 @@ class testWSgetBusinessActions extends TestCase {
 	/**
 	 * Method testemptymodule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testemptymodule() {
 		global $current_user;
@@ -369,7 +414,6 @@ class testWSgetBusinessActions extends TestCase {
 	/**
 	 * Method testinexistentmodule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testinexistentmodule() {
 		global $current_user;
@@ -381,7 +425,6 @@ class testWSgetBusinessActions extends TestCase {
 	/**
 	 * Method testnopermissionmodule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnopermissionmodule() {
 		$user = new Users();
@@ -394,7 +437,6 @@ class testWSgetBusinessActions extends TestCase {
 	/**
 	 * Method testnotpermittedmoduledetail
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnotpermittedmoduledetail() {
 		global $current_user;

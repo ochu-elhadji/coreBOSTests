@@ -19,7 +19,7 @@
  *************************************************************************************************/
 use PHPUnit\Framework\TestCase;
 
-class testVtlibUtils extends TestCase {
+class VtlibUtilsTest extends TestCase {
 
 	/**
 	 * Method vtlib_purifyProvider
@@ -32,7 +32,7 @@ class testVtlibUtils extends TestCase {
 			array('Special character string áçèñtös ÑÇ',false,'Special character string áçèñtös ÑÇ','Special character string with áçèñtös'),
 			array('!"·$%&/();,:.=?¿*_-|@#€',false,'!"·$%&/();,:.=?¿*_-|@#€','special string with symbols'),
 			array('Greater > Lesser < ',false,'Greater &gt; Lesser &lt; ','Greater > Lesser <(space)'),
-			array('Greater > Lesser <',false,'Greater &gt; Lesser ','Greater > Lesser <'),
+			array('Greater > Lesser <',false,'Greater &gt; Lesser &lt;','Greater > Lesser <'),
 			array('> Greater > Lesser < ',false,'&gt; Greater &gt; Lesser &lt; ','> Greater Lesser <(space)'),
 			array('"\'',false,'"\'','special string with quotes'),
 			array('<b>Bold HTML</b>',false,'<b>Bold HTML</b>','Bold HTML'),
@@ -86,6 +86,20 @@ class testVtlibUtils extends TestCase {
 			// test url
 			array('http://localhost',false,'http://localhost','url'),
 			array('https://corebos.org',false,'https://corebos.org','urls'),
+			array('<a href="https://corebos.org"></a>',false,'<a href="https://corebos.org"></a>','a href'),
+			array('<a href="javascript:alert(document.domain)">XSShref1</a>',false,'<a>XSShref1</a>','JS XSS a href'),
+			array('<a href="javascript&colon;alert(document.domain)">XSShref2</a>',false,'<a>XSShref2</a>','JS XSS a href'),
+			array("<a href=\"javascript:display('javascript:alert(document.domain)','feedlist_1')\">test</a>",false,'<a>test</a>','javascript'),
+			array('&forrecord=xss%22%20autofocus/onfocus=%22alert(5)%22%20id=%27xxx', false, '&forrecord=xss%22%20autofocus/onfocus=%22alert(5)%22%20id=%27xxx', 'javascript'),
+			array(
+				'<p><svg onmouseover="alert(1)">.svg &lt;<script>alert(\'xss\')<!--a-->a.png
+				<noscript><p title="</noscript><img src=x onerror=alert(document.domain)>">.jpg
+				<img src=\'1\' onerror=\'alert(1)\' <
+				</svg></p></svg></p></svg></p></svg></p></svg></p></svg></p></svg></p>',
+				false,
+				'<p>.svg &lt;</p>',
+				'XSS'
+			)
 		);
 	}
 
@@ -134,6 +148,10 @@ class testVtlibUtils extends TestCase {
 			array('EtiquetasOO', true),
 			array('SMSNotifier', false),
 			array('cbAuditTrail', true),
+			array('InexistentModule', false),
+			array('', false),
+			array(0, false),
+			array(6, false),
 		);
 	}
 

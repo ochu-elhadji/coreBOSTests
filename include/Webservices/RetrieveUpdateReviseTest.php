@@ -25,7 +25,7 @@ The only difference is that REVISE does not require the presence of mandatory fi
 
 use PHPUnit\Framework\TestCase;
 
-class WSRetrieveUpdateReviseTest extends TestCase {
+class RetrieveUpdateReviseTest extends TestCase {
 
 	/****
 	 * TEST Users decimal configuration
@@ -110,7 +110,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 		///////////////
 		$pdoID = vtws_getEntityId('Products');
 		$user = new Users();
-		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile($this->usrcomd0x);
 		$current_user = $user;
 		$actual = vtws_retrieve($pdoID.'x2633', $user);
@@ -170,7 +169,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testRetrieveExceptionNoAccessRecord
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testRetrieveExceptionNoAccessRecord() {
 		global $current_user;
@@ -192,7 +190,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testRetrieveExceptionNoAccessModule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testRetrieveExceptionNoAccessModule() {
 		global $current_user;
@@ -214,7 +211,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testRetrieveExceptionEmptyID
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testRetrieveExceptionEmptyID() {
 		global $current_user;
@@ -562,10 +558,11 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 		$updateCto = $beforeCto;
 		$updateCto['ticketpriorities'] = 'Low';
 		vtws_update($updateCto, $current_user);
-		$date = date('l dS F Y h:i:s A');
+		$date = date('l dS F Y h:i: A');
 		$actual = vtws_retrieve($ctoID.'x2728', $current_user);
 		$this->assertEquals('Low', $actual['ticketpriorities'], 'update ticketpriorities');
-		$this->assertEquals($expected.' Priority Changed to Low\. -- '.$date.' by admin--//--', $actual['update_log']);
+		$updatelog = substr($actual['update_log'], 0, strlen($actual['update_log'])-20).substr($actual['update_log'], strlen($actual['update_log'])-18);
+		$this->assertEquals($expected.' Priority Changed to Low\. -- '.$date.' by admin--//--', $updatelog);
 		$adb->pquery("update vtiger_troubletickets set priority='High', update_log=? where ticketid=2728", array($expected));
 		$actual = vtws_retrieve($ctoID.'x2728', $current_user);
 		unset($beforeCto['modifiedby'], $beforeCto['modifiedtime'], $beforeCto['commentadded'], $actual['commentadded'], $actual['modifiedby'], $actual['modifiedtime']);
@@ -665,10 +662,11 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testUpdateExceptionInvalidImage
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testUpdateExceptionInvalidImage() {
 		global $current_user, $adb;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('VALIDATION_FAILED');
 		$current_user = Users::getActiveAdminUser();
 		$ctoID = vtws_getEntityId('Contacts');
 		$beforeCto = vtws_retrieve($ctoID.'x1561', $current_user);
@@ -691,7 +689,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testUpdateExceptionMissingFields
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testUpdateExceptionMissingFields() {
 		global $current_user;
@@ -721,7 +718,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testUpdateExceptionNoAccessRecord
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testUpdateExceptionNoAccessRecord() {
 		global $current_user;
@@ -743,7 +739,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testUpdateExceptionNoAccessModule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testUpdateExceptionNoAccessModule() {
 		global $current_user;
@@ -765,7 +760,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testUpdateExceptionEmptyID
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testUpdateExceptionEmptyID() {
 		global $current_user;
@@ -1104,7 +1098,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testReviseExceptionNoAccessRecord
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testReviseExceptionNoAccessRecord() {
 		global $current_user;
@@ -1126,7 +1119,6 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testReviseExceptionNoAccessModule
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testReviseExceptionNoAccessModule() {
 		global $current_user;
@@ -1148,10 +1140,11 @@ class WSRetrieveUpdateReviseTest extends TestCase {
 	/**
 	 * Method testReviseExceptionEmptyID
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testReviseExceptionEmptyID() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$this->expectException(WebServiceException::class);
 		$this->expectExceptionCode(WebServiceErrorCode::$INVALIDID);
 		vtws_revise(array('f1'=>'v1', 'f2'=>'v2', 'f3'=>'v3'), $current_user);

@@ -24,11 +24,11 @@ include_once 'include/Webservices/ValidateInformation.php';
 include_once 'include/Webservices/Create.php';
 include_once 'include/Webservices/Delete.php';
 
-class testValidateInformation extends TestCase {
+class ValidateInformationTest extends TestCase {
 
 	protected static $mapid;
 
-	public static function setUpBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		global $current_user;
 		$cbUserID = '19x'.$current_user->id;
 		$ObjectValues = array(
@@ -71,7 +71,7 @@ class testValidateInformation extends TestCase {
 		self::$mapid = $map['id'];
 	}
 
-	public static function tearDownAfterClass() {
+	public static function tearDownAfterClass(): void {
 		global $current_user;
 		vtws_delete(self::$mapid, $current_user);
 	}
@@ -140,7 +140,10 @@ class testValidateInformation extends TestCase {
 			'wsresult' => array(
 				'subject' => array('Subject is required'),
 				'quotestage' => array('Quote Stage is required', 'Quote Stage must not exceed 200 characters'),
-				'account_id' => array('Organization Name is required'),
+				'account_id' => array(
+					'Organization Name must be an integer',
+					'Organization Name is required'
+				),
 				'assigned_user_id' => array('Assigned To is required'),
 				'bill_street' => array(
 					'Billing Address is required',

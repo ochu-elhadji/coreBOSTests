@@ -311,6 +311,18 @@ class WorkFlowSchedulerQueryTest extends TestCase {
 		$actual = $workflowScheduler->getWorkflowQuery($workflow);
 		$expected = "SELECT vtiger_products.productid FROM vtiger_products  INNER JOIN vtiger_crmentity ON vtiger_products.productid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_products.expiry_date = CURDATE()) )) AND vtiger_products.productid > 0";
 		$this->assertEquals($expected, $actual, 'product end today');
+		//////////////////////
+		$wfvals['test'] = '[{"fieldname":"expiry_date","operation":"monthday","value":"2020-04-14","valuetype":"rawtext","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT vtiger_products.productid FROM vtiger_products  INNER JOIN vtiger_crmentity ON vtiger_products.productid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( DATE_FORMAT(vtiger_products.expiry_date,'%m%d') = '0414') )) AND vtiger_products.productid > 0";
+		$this->assertEquals($expected, $actual, 'product expiry monthday 0414');
+		//////////////////////
+		$wfvals['test'] = '[{"fieldname":"expiry_date","operation":"monthday","value":"get_date(\'today\')","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT vtiger_products.productid FROM vtiger_products  INNER JOIN vtiger_crmentity ON vtiger_products.productid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( DATE_FORMAT(vtiger_products.expiry_date,'%m%d') = DATE_FORMAT(CURDATE(),'%m%d') ) )) AND vtiger_products.productid > 0";
+		$this->assertEquals($expected, $actual, 'product expiry monthday today');
 	}
 
 	/**
@@ -488,10 +500,11 @@ class WorkFlowSchedulerQueryTest extends TestCase {
 	/**
 	 * Method testgetWorkflowQueryMathExceptionOnEqual
 	 * @test
-	 * @expectedException Exception
 	 */
 	public function testgetWorkflowQueryMathExceptionOnEqual() {
 		global $adb, $currentModule;
+		$this->expectException(Exception::class);
+		//$this->expectExceptionCode('INVALID_MODULE');
 		$currentModule = 'Invoice';
 		$workflowScheduler = new WorkFlowScheduler($adb);
 		$workflow = new Workflow();
@@ -623,6 +636,45 @@ class WorkFlowSchedulerQueryTest extends TestCase {
 		$this->assertEquals($expected, $actual, 'UserPermissions');
 	}
 
+	/**
+	 * Method testgetGroupID
+	 * @test
+	 */
+	public function testgetGroupID() {
+		global $adb, $currentModule;
+		$currentModule = 'HelpDesk';
+		$workflowScheduler = new WorkFlowScheduler($adb);
+		$workflow = new Workflow();
+		$wfvals = $this->defaultWF;
+		$wfvals['module_name'] = 'HelpDesk';
+		//////////////////////
+		$wfvals['select_expressions'] = 'id';
+		$wfvals['test'] = '[{"fieldname":"assigned_user_id : (Users) id","operation":"is","value":"getGroupID(\'Marketing\')","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$user = new Users();
+		$user->retrieveCurrentUserInfoFromFile(7); // testymd HelpDesk is private
+		$actual = $workflowScheduler->getWorkflowQuery($workflow, array(), true, $user);
+		$expected = "SELECT vtiger_troubletickets.ticketid FROM vtiger_troubletickets  INNER JOIN vtiger_crmentity ON vtiger_troubletickets.ticketid = vtiger_crmentity.crmid LEFT JOIN vtiger_users ON vtiger_users.id = vtiger_crmentity.smownerid  LEFT JOIN vtiger_groups ON vtiger_groups.groupid = vtiger_crmentity.smownerid  INNER JOIN vt_tmp_u7 vt_tmp_u7 ON vt_tmp_u7.id = vtiger_crmentity.smownerid  WHERE vtiger_crmentity.deleted=0 AND   (  ((vtiger_users.id = (select groupid from vtiger_groups where groupname='Marketing') or vtiger_groups.groupid = (select groupid from vtiger_groups where groupname='Marketing')) )) AND vtiger_troubletickets.ticketid > 0";
+		$this->assertEquals($expected, $actual, 'UserPermissions');
+	}
+
+	/**
+	 * Method testWfBooleanExpressionFromRelated
+	 * @test
+	 */
+	public function testWfBooleanExpressionFromRelated() {
+		global $adb, $currentModule;
+		$currentModule = 'Contacts';
+		$workflowScheduler = new WorkFlowScheduler($adb);
+		$workflow = new Workflow();
+		$wfvals = $this->defaultWF;
+		$wfvals['module_name'] = 'Contacts';
+		$wfvals['test'] = '[{"fieldname":"account_id : (Accounts) emailoptout","operation":"is","value":"true:boolean","valuetype":"rawtext","joincondition":"and","groupid":"0","groupjoin":""},{"fieldname":"firstname","operation":"is","value":"Lina","valuetype":"rawtext","joincondition":"and","groupid":"0","groupjoin":""},{"fieldname":"notify_owner","operation":"is","value":"false:boolean","valuetype":"rawtext","joincondition":"and","groupid":"0","groupjoin":""}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT vtiger_contactdetails.contactid FROM vtiger_contactdetails  INNER JOIN vtiger_crmentity ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid LEFT JOIN vtiger_account AS vtiger_accountaccount_id ON vtiger_accountaccount_id.accountid=vtiger_contactdetails.accountid  WHERE vtiger_crmentity.deleted=0 AND   (  ((vtiger_accountaccount_id.emailoptout = '1')  and ( vtiger_contactdetails.firstname = 'Lina')  and ( vtiger_contactdetails.notify_owner = '0') )) AND vtiger_contactdetails.contactid > 0";
+		$this->assertEquals($expected, $actual);
+	}
 	// /**
 	//  * Method testgetWorkflowQueryFieldType
 	//  * @test

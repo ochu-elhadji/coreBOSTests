@@ -94,7 +94,7 @@ class UsersTest extends TestCase {
 			'currency_symbol' => '&#8364;',
 			'conv_rate' => '1.000000',
 			'imagenameimageinfo' => '',
-			'ename' => '',
+			'ename' => ' Administrator',
 		);
 		if (empty($user->column_fields['reports_to_id'])) { // can be empty string or null too
 			$user->column_fields['reports_to_id']= '0';
@@ -157,7 +157,7 @@ class UsersTest extends TestCase {
 			'currency_symbol' => '&#8364;',
 			'conv_rate' => '1.000000',
 			'imagenameimageinfo' => '',
-			'ename' => '',
+			'ename' => 'cbTest testes',
 		);
 		$this->assertEquals($expected, $user->column_fields, 'retrieveCurrentUserInfoFromFile testes');
 		$user = new Users();
@@ -217,11 +217,30 @@ class UsersTest extends TestCase {
 			'currency_symbol' => '&#8364;',
 			'conv_rate' => '1.000000',
 			'imagenameimageinfo' => '',
-			'ename' => '',
+			'ename' => 'cbTest testinactive',
 		);
 		if ($user->column_fields['currency_symbol']=='€') {
 			$expected['currency_symbol']='€';
 		}
 		$this->assertEquals($expected, $user->column_fields, 'retrieveCurrentUserInfoFromFile inactive');
+	}
+
+	/**
+	 * Method testverifyPassword
+	 * @test
+	 */
+	public function testverifyPassword() {
+		$user = new Users();
+		$user->retrieveCurrentUserInfoFromFile(1);
+		$this->assertFalse($user->verifyPassword('not the right one'), 'verifyPassword 1 wrong');
+		$this->assertTrue($user->verifyPassword('admin'), 'verifyPassword 1 right');
+		$user = new Users();
+		$user->retrieveCurrentUserInfoFromFile(8);
+		$this->assertFalse($user->verifyPassword('not the right one'), 'verifyPassword testes wrong');
+		$this->assertTrue($user->verifyPassword('testes'), 'verifyPassword testes right');
+		$user = new Users();
+		$user->retrieveCurrentUserInfoFromFile(9);
+		$this->assertFalse($user->verifyPassword('not the right one'), 'verifyPassword testinactive wrong');
+		$this->assertTrue($user->verifyPassword('testinactive'), 'verifyPassword testinactive right');
 	}
 }

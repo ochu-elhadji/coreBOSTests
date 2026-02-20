@@ -188,10 +188,37 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 		$wfvals['select_expressions'] = '[{"fieldname":"randomstringres","operation":"is","value":"randomstring(12)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
 		$workflow->setup($wfvals);
 		$actual = $workflowScheduler->getWorkflowQuery($workflow);
-		$expected = 'SELECT REPLACE(vtiger_invoice.subject,\'x\',\'a\') AS stringreplaceres FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_invoice.invoicestatus IN (
-									select translation_key
-									from vtiger_cbtranslation
-									where locale="en_us" and forpicklist="Invoice::invoicestatus" and i18n = \'Created\') OR vtiger_invoice.invoicestatus = \'Created\') )) AND vtiger_invoice.invoiceid > 0';
+		$expected = 'SELECT SUBSTRING(HEX(CONCAT(NOW(), RAND(), UUID())), 1, 12) AS randomstringres FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_invoice.invoiceid > 0';
+		$this->assertEquals($expected, $actual);
+		//////////////////////
+		$wfvals['select_expressions'] = '[{"fieldname":"regexreplaceres","operation":"is","value":"regexreplace(\'[A-Z]+\', \'x\', \'subject\')","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = 'SELECT REGEXP_REPLACE(vtiger_invoice.subject,\'[A-Z]+\',\'x\') AS regexreplaceres FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_invoice.invoiceid > 0';
+		$this->assertEquals($expected, $actual);
+		//////////////////////
+		$wfvals['select_expressions'] = '[{"fieldname":"uniqid","operation":"is","value":"uniqid(\'AZ\')","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT concat('AZ',uuid_short()) AS uniqid FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_invoice.invoiceid > 0";
+		$this->assertEquals($expected, $actual);
+		//////////////////////
+		$wfvals['select_expressions'] = '[{"fieldname":"uniqid","operation":"is","value":"uniqid()","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT uuid_short() AS uniqid FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_invoice.invoiceid > 0";
+		$this->assertEquals($expected, $actual);
+		//////////////////////
+		$wfvals['select_expressions'] = '[{"fieldname":"chr","operation":"is","value":"char()","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = 'SELECT "" AS chr FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_invoice.invoiceid > 0';
+		$this->assertEquals($expected, $actual);
+		//////////////////////
+		$wfvals['select_expressions'] = '[{"fieldname":"chr","operation":"is","value":"char(39)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT char(39) AS chr FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_invoice.invoiceid > 0";
 		$this->assertEquals($expected, $actual);
 	}
 
@@ -353,6 +380,24 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 		$workflow->setup($wfvals);
 		$actual = $workflowScheduler->getWorkflowQuery($workflow);
 		$expected = 'SELECT CEILING((vtiger_invoice.adjustment+vtiger_invoice.exciseduty)) AS ceilres FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_invoice.invoicestatus IN (
+									select translation_key
+									from vtiger_cbtranslation
+									where locale="en_us" and forpicklist="Invoice::invoicestatus" and i18n = \'Created\') OR vtiger_invoice.invoicestatus = \'Created\') )) AND vtiger_invoice.invoiceid > 0';
+		$this->assertEquals($expected, $actual);
+		////////////////////// sum_taxtotal
+		$wfvals['select_expressions'] = '[{"fieldname":"ceilres","operation":"is","value":"average(1,2,3)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = 'SELECT (SELECT avg(nums) FROM ((select 1 as nums) union (select 2 as nums) union (select 3 as nums)) as setofnums) AS ceilres FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_invoice.invoicestatus IN (
+									select translation_key
+									from vtiger_cbtranslation
+									where locale="en_us" and forpicklist="Invoice::invoicestatus" and i18n = \'Created\') OR vtiger_invoice.invoicestatus = \'Created\') )) AND vtiger_invoice.invoiceid > 0';
+		$this->assertEquals($expected, $actual);
+		//////////////////////
+		$wfvals['select_expressions'] = '[{"fieldname":"ceilres","operation":"is","value":"average(22,sum_taxtotal,sum_taxtotalretention)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = 'SELECT (SELECT avg(nums) FROM ((select 22 as nums) union (select vtiger_invoice.sum_taxtotal as nums) union (select vtiger_invoice.sum_taxtotalretention as nums)) as setofnums) AS ceilres FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_invoice.invoicestatus IN (
 									select translation_key
 									from vtiger_cbtranslation
 									where locale="en_us" and forpicklist="Invoice::invoicestatus" and i18n = \'Created\') OR vtiger_invoice.invoicestatus = \'Created\') )) AND vtiger_invoice.invoiceid > 0';
@@ -563,6 +608,15 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 									from vtiger_cbtranslation
 									where locale="en_us" and forpicklist="Invoice::invoicestatus" and i18n = \'Created\') OR vtiger_invoice.invoicestatus = \'Created\') )) AND vtiger_invoice.invoiceid > 0';
 		$this->assertEquals($expected, $actual);
+		//////////////////////
+		$wfvals['select_expressions'] = '[{"fieldname":"subtimeres","operation":"is","value":"add_time(duedate , time_diff(get_date(\'time\'), modifiedtime ))","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = 'SELECT DATE_ADD(vtiger_invoice.duedate,INTERVAL timediff(CURTIME(),vtiger_crmentity.modifiedtime) MINUTE) AS subtimeres FROM vtiger_invoice  INNER JOIN vtiger_crmentity ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_invoice.invoicestatus IN (
+									select translation_key
+									from vtiger_cbtranslation
+									where locale="en_us" and forpicklist="Invoice::invoicestatus" and i18n = \'Created\') OR vtiger_invoice.invoicestatus = \'Created\') )) AND vtiger_invoice.invoiceid > 0';
+		$this->assertEquals($expected, $actual);
 	}
 
 	/**
@@ -643,10 +697,11 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 	/**
 	 * Method testWorkFlowAggregationsExceptions
 	 * @test
-	 * @expectedException Exception
 	 */
 	public function testWorkFlowAggregationsExceptions() {
 		global $adb;
+		$this->expectException(Exception::class);
+		//$this->expectExceptionCode('INVALID_MODULE');
 		$workflowScheduler = new WorkFlowScheduler($adb);
 		$workflow = new Workflow();
 		$wfvals = $this->defaultWF;
@@ -654,7 +709,7 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 		//////////////////////
 		$wfvals['select_expressions'] = '[{"fieldname":"concatres","operation":"is","value":"group_concat(subject separator \';\')","valuetype":"expression","joincondition":"and","groupid":"0"}]';
 		$workflow->setup($wfvals);
-		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$workflowScheduler->getWorkflowQuery($workflow);
 	}
 
 	/**
@@ -764,6 +819,51 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 	}
 
 	/**
+	 * Method testexecuteSQL
+	 * @test
+	 */
+	public function testexecuteSQL() {
+		global $adb;
+		$workflowScheduler = new WorkFlowScheduler($adb);
+		$workflow = new Workflow();
+		$wfvals = $this->defaultWF;
+		$wfvals['module_name'] = 'Accounts';
+		$wfvals['test'] = '';
+		$wfvals['select_expressions'] = '[{"fieldname":"acc","operation":"is","value":"executeSQL(\'select accountname from vtiger_account where otherphone=?\',\'248-697-7722\')","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT (select accountname from vtiger_account where otherphone='248-697-7722') AS acc FROM vtiger_account  INNER JOIN vtiger_crmentity ON vtiger_account.accountid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_account.accountid > 0";
+		$this->assertEquals($expected, $actual);
+	}
+
+	/**
+	 * Method testgetCRMIDFromWSID
+	 * @test
+	 */
+	public function testgetCRMIDFromWSID() {
+		global $adb;
+		$workflowScheduler = new WorkFlowScheduler($adb);
+		$workflow = new Workflow();
+		$wfvals = $this->defaultWF;
+		$wfvals['module_name'] = 'Potentials';
+		$wfvals['test'] = '';
+		$wfvals['select_expressions'] = '[{"fieldname":"entitycrmid","operation":"is","value":"getCRMIDFromWSID(id)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = 'SELECT crmid AS entitycrmid FROM vtiger_potential  INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_potential.potentialid > 0';
+		$this->assertEquals($expected, $actual);
+		$workflow = new Workflow();
+		$wfvals = $this->defaultWF;
+		$wfvals['module_name'] = 'Potentials';
+		$wfvals['test'] = '[{"fieldname":"potentialname","operation":"greater than","value":"getCRMIDFromWSID(id)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$wfvals['select_expressions'] = '[{"fieldname":"entitycrmid","operation":"is","value":"getCRMIDFromWSID(id)","valuetype":"expression","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = 'SELECT crmid AS entitycrmid FROM vtiger_potential  INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_potential.potentialname > crmid) )) AND vtiger_potential.potentialid > 0';
+		$this->assertEquals($expected, $actual);
+	}
+
+	/**
 	 * Method testgetSetting
 	 * @test
 	 */
@@ -806,6 +906,34 @@ class WorkFlowSchedulerSelectEnhancementTest extends TestCase {
 		$workflow->setup($wfvals);
 		$actual = $workflowScheduler->getWorkflowQuery($workflow);
 		$expected = 'SELECT COUNT(vtiger_account.accountname) AS countres FROM vtiger_account  INNER JOIN vtiger_crmentity ON vtiger_account.accountid = vtiger_crmentity.crmid  WHERE vtiger_crmentity.deleted=0 AND vtiger_account.accountid > 0';
+		$this->assertEquals($expected, $actual);
+	}
+
+	/**
+	 * Method testConditionsWithCommas
+	 * @test
+	 */
+	public function testConditionsWithCommas() {
+		global $adb;
+		$workflowScheduler = new WorkFlowScheduler($adb);
+		$workflow = new Workflow();
+		$wfvals = $this->defaultWF;
+		$wfvals['module_name'] = 'Contacts';
+		$wfvals['test'] = '[{"fieldname":"mailingstreet","operation":"contains","value":"Via Filippo Turati, 46, Milano, MI, Italia", "valuetype":"raw","joincondition":"AND","groupid":"ragroup","groupjoin":"and"}]';
+		$wfvals['select_expressions'] = '[{"fieldname":"mailingstreet","operation":"is","value":"mailingstreet","valuetype":"rawtext","joincondition":"and","groupid":"0"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT mailingstreet FROM vtiger_contactdetails  INNER JOIN vtiger_crmentity ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_contactaddress.mailingstreet LIKE '%Via Filippo Turati%' OR vtiger_contactaddress.mailingstreet LIKE '% 46%' OR vtiger_contactaddress.mailingstreet LIKE '% Milano%' OR vtiger_contactaddress.mailingstreet LIKE '% MI%' OR vtiger_contactaddress.mailingstreet LIKE '% Italia%') )) AND vtiger_contactdetails.contactid > 0";
+		$this->assertEquals($expected, $actual);
+		$wfvals['test'] = '[{"fieldname":"mailingstreet","operation":"is","value":"Via Filippo Turati, 46, Milano, MI, Italia", "valuetype":"raw","joincondition":"AND","groupid":"ragroup","groupjoin":"and"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT mailingstreet FROM vtiger_contactdetails  INNER JOIN vtiger_crmentity ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_contactaddress.mailingstreet = 'Via Filippo Turati, 46, Milano, MI, Italia') )) AND vtiger_contactdetails.contactid > 0";
+		$this->assertEquals($expected, $actual);
+		$wfvals['test'] = '[{"fieldname":"mailingstreet","operation":"containsnc","value":"Via Filippo Turati, 46, Milano, MI, Italia", "valuetype":"raw","joincondition":"AND","groupid":"ragroup","groupjoin":"and"}]';
+		$workflow->setup($wfvals);
+		$actual = $workflowScheduler->getWorkflowQuery($workflow);
+		$expected = "SELECT mailingstreet FROM vtiger_contactdetails  INNER JOIN vtiger_crmentity ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid  WHERE vtiger_crmentity.deleted=0 AND   (  (( vtiger_contactaddress.mailingstreet LIKE '%Via Filippo Turati, 46, Milano, MI, Italia%') )) AND vtiger_contactdetails.contactid > 0";
 		$this->assertEquals($expected, $actual);
 	}
 }

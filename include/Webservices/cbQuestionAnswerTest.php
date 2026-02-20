@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 include_once 'include/Webservices/cbQuestion.php';
 
-class testWScoreBOSQuestion extends TestCase {
+class cbQuestionAnswerTest extends TestCase {
 
 	/**
 	 * Method testquestion
@@ -36,6 +36,7 @@ class testWScoreBOSQuestion extends TestCase {
 			'title' => 'workflow',
 			'type' => 'Table',
 			'properties' => '',
+			'groupings' => [],
 		);
 		$actual = cbwsGetAnswer(vtws_getEntityId('cbQuestion').'x44079', '', $current_user);
 		$answer = $actual['answer'];
@@ -56,6 +57,12 @@ class testWScoreBOSQuestion extends TestCase {
 			'title' => 'Ticket per Status',
 			'type' => 'Pie',
 			'properties' => '{"key_label":"ticketstatus","key_value":"countres"}',
+			'groupings' => [
+				'[{"columnname":"vtiger_troubletickets:status:ticketstatus:HelpDesk_Status:V","comparator":"e","value":"Closed","groupid":1,"columncondition":""}]',
+				'[{"columnname":"vtiger_troubletickets:status:ticketstatus:HelpDesk_Status:V","comparator":"e","value":"In Progress","groupid":1,"columncondition":""}]',
+				'[{"columnname":"vtiger_troubletickets:status:ticketstatus:HelpDesk_Status:V","comparator":"e","value":"Open","groupid":1,"columncondition":""}]',
+				'[{"columnname":"vtiger_troubletickets:status:ticketstatus:HelpDesk_Status:V","comparator":"e","value":"Wait For Response","groupid":1,"columncondition":""}]',
+			],
 			'answer' => array(
 				0 => array(
 					'countres' => '3',
@@ -88,10 +95,11 @@ class testWScoreBOSQuestion extends TestCase {
 	/**
 	 * Method testinvalidmoduleexception
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testinvalidmoduleexception() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$this->expectException(WebServiceException::class);
 		$this->expectExceptionCode(WebServiceErrorCode::$ACCESSDENIED);
 		cbwsGetAnswer('11x74', array(), $current_user);
@@ -100,10 +108,11 @@ class testWScoreBOSQuestion extends TestCase {
 	/**
 	 * Method testReadExceptionNoPermission
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testReadExceptionNoPermission() {
 		global $current_user;
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$holduser = $current_user;
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(5); // testdmy

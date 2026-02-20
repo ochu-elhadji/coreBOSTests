@@ -24,14 +24,15 @@ include_once 'include/Webservices/ChangePassword.php';
 require_once 'include/Webservices/WebServiceErrorCode.php';
 include_once 'include/Webservices/Login.php';
 
-class testWSchangePassword extends TestCase {
+class ChangePasswordTest extends TestCase {
 
 	/**
 	 * Method testinsecurepassword
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testinsecurepassword() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(5); // testdmy
 		$this->expectException(WebServiceException::class);
@@ -42,9 +43,10 @@ class testWSchangePassword extends TestCase {
 	/**
 	 * Method testincorrectoldpassword
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testincorrectoldpassword() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(5); // testdmy
 		$this->expectException(WebServiceException::class);
@@ -55,9 +57,10 @@ class testWSchangePassword extends TestCase {
 	/**
 	 * Method testemptyoldpassword
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testemptyoldpassword() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(5); // testdmy
 		$this->expectException(WebServiceException::class);
@@ -68,9 +71,10 @@ class testWSchangePassword extends TestCase {
 	/**
 	 * Method testnonexistentuser
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnonexistentuser() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$user = Users::getActiveAdminUser();
 		$this->expectException(WebServiceException::class);
 		$this->expectExceptionCode(WebServiceErrorCode::$INVALIDUSER);
@@ -80,9 +84,10 @@ class testWSchangePassword extends TestCase {
 	/**
 	 * Method testnotsamenonadminuser
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testnotsamenonadminuser() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(5); // testdmy
 		$this->expectException(WebServiceException::class);
@@ -93,9 +98,10 @@ class testWSchangePassword extends TestCase {
 	/**
 	 * Method testinactiveuser
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testinactiveuser() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$user = Users::getActiveAdminUser();
 		$this->expectException(WebServiceException::class);
 		$this->expectExceptionCode(WebServiceErrorCode::$INVALIDUSER);
@@ -105,9 +111,10 @@ class testWSchangePassword extends TestCase {
 	/**
 	 * Method testdifferentnewpassword
 	 * @test
-	 * @expectedException WebServiceException
 	 */
 	public function testdifferentnewpassword() {
+		$this->expectException(WebServiceException::class);
+		$this->expectExceptionCode('INVALID_MODULE');
 		$user = Users::getActiveAdminUser();
 		$this->expectException(WebServiceException::class);
 		$this->expectExceptionCode(WebServiceErrorCode::$CHANGEPASSWORDFAILURE);
@@ -120,15 +127,19 @@ class testWSchangePassword extends TestCase {
 	 */
 	public function testchangepassword() {
 		global $adb;
+		$adb->query("DELETE FROM password_history WHERE crmid=5 and crmtype='U'");
 		$user = new Users();
 		$user->retrieveCurrentUserInfoFromFile(5); // testdmy
 		$accesskey = vtws_getUserAccessKey(5);
 		$this->assertTrue($user->verifyPassword('testdmy'));
 		$actual = vtws_changePassword('19x5', 'testdmy', 'newPa$$wo4d', 'newPa$$wo4d', $user);
-		$expected = array('message' => 'Changed password successfully');
+		$expected = array(
+			'message' => 'Changed password successfully. Save your new Access Key, you will not see it again.',
+			'accesskey' => getSingleFieldValue('vtiger_users', 'accesskey', 'id', 5),
+		);
 		$this->assertEquals($expected, $actual);
 		$this->assertTrue($user->verifyPassword('newPa$$wo4d'));
-		$user->change_password('newPa$$wo4d', 'testdmy', false);
+		$user->change_password('newPa$$wo4d', 'testdmy');
 		$this->assertTrue($user->verifyPassword('testdmy'));
 		// restore accesskey
 		$adb->pquery('update vtiger_users set accesskey=? where id=5', array($accesskey));

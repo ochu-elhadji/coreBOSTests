@@ -60,6 +60,7 @@ class ModuleTypesTest extends TestCase {
 			'Emails',
 			'HelpDesk',
 			'Users',
+			'DocumentFolders',
 			'PBXManager',
 			'ServiceContracts',
 			'Services',
@@ -89,14 +90,16 @@ class ModuleTypesTest extends TestCase {
 			'cbPulse',
 			'MsgTemplate',
 			'cbCredentials',
+			'pricebookproductrel',
+			'AutoNumberPrefix',
 			'Groups',
 			'Currency',
-			'DocumentFolders',
 			'CompanyDetails',
 			'Workflow',
 			'AuditTrail',
 			'LoginHistory',
-			'ModTracker'
+			'ModTracker',
+			'contactinfo',
 			),
 			'information' => array(
 			'Campaigns' => array(
@@ -335,9 +338,9 @@ class ModuleTypesTest extends TestCase {
 				'singular' => 'Currency',
 			),
 			'DocumentFolders' => array(
-				'isEntity' => false,
-				'label' => 'DocumentFolders',
-				'singular' => 'DocumentFolders',
+				'isEntity' => true,
+				'label' => 'Document Folders',
+				'singular' => 'Document Folder',
 			),
 			'CompanyDetails' => array(
 				'isEntity' => false,
@@ -368,6 +371,21 @@ class ModuleTypesTest extends TestCase {
 				'isEntity' => true,
 				'label' => 'Credentials',
 				'singular' => 'Credential',
+			),
+			'pricebookproductrel' => array(
+				'isEntity' => true,
+				'label' => 'Price Lists',
+				'singular' => 'Price List',
+			),
+			'AutoNumberPrefix' => array(
+				'isEntity' => true,
+				'label' => 'Auto Number Prefix',
+				'singular' => 'Auto Number Prefix',
+			),
+			'contactinfo' => array(
+				'isEntity' => false,
+				'label' => 'contactinfo',
+				'singular' => 'contactinfo',
 			),
 			),
 		);

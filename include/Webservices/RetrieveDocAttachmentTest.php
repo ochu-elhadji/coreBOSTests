@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 include_once 'include/Webservices/RetrieveDocAttachment.php';
 
-class testWSRetrieveDocAttachment extends TestCase {
+class RetrieveDocAttachmentTest extends TestCase {
 
 	/**
 	 * Method testretrievedoc
@@ -44,7 +44,7 @@ class testWSRetrieveDocAttachment extends TestCase {
 			'filelocationtype'=>'E',
 			'filedownloadcount'=> '',
 			'filestatus'=> '1',
-			'folderid' => '22x1',
+			'folderid' => '',
 			'notecontent' => 'áçèñtös',
 			'modifiedby' => $cbUserID,
 			'template' => '0',
@@ -59,7 +59,6 @@ class testWSRetrieveDocAttachment extends TestCase {
 		$ObjectValues['modifiedtime'] = $actual['modifiedtime'];
 		$ObjectValues['cbuuid'] = CRMEntity::getUUIDfromWSID($actual['id']);
 		$ObjectValues['filename'] = 'https://some external place';
-		$ObjectValues['relations'] = array();
 		$this->assertEquals($ObjectValues, $actual, 'Create Document E');
 		$sdoc = vtws_retrievedocattachment($actual['id'], true, $current_user);
 		list($wsid, $crmid) = explode('x', $actual['id']);

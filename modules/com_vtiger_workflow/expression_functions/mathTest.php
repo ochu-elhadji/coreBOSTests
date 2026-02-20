@@ -19,7 +19,7 @@
  *************************************************************************************************/
 use PHPUnit\Framework\TestCase;
 
-class workflowfunctionsmathTest extends TestCase {
+class mathTest extends TestCase {
 
 	/**
 	 * Method testmathfunctions
@@ -142,6 +142,58 @@ class workflowfunctionsmathTest extends TestCase {
 		$this->assertEquals("999.394.395,00000", $actual);
 		$actual = __cb_number_format(array(99923456785433.999999,6,".",':'));
 		$this->assertEquals("99:923:456:785:434.000000", $actual);
+	}
+
+	//test power
+	public function testpowerfunction() {
+		$actual = __vt_power(array());
+		$this->assertEquals(0, $actual);
+		$actual = __vt_power(0);
+		$this->assertEquals(0, $actual);
+		$actual = __vt_power(array(1, 1));
+		$this->assertEquals(1, $actual);
+		$actual = __vt_power(array(2, 1));
+		$this->assertEquals(2, $actual);
+		$actual = __vt_power(array(2, 3));
+		$this->assertEquals(8, $actual);
+		$actual = __vt_power(array(3, 2));
+		$this->assertEquals(9, $actual);
+		$actual = __vt_power(array(2));
+		$this->assertEquals(1, $actual);
+	}
+
+	//test log
+	public function testlogfunction() {
+		$actual = __cb_logarithm(array());
+		$this->assertEquals(0, $actual);
+		$actual = __cb_logarithm(0);
+		$this->assertEquals(0, $actual);
+		$actual = __cb_logarithm(array(2, 10));
+		$this->assertEquals(0.3010299956639812, $actual);
+		$actual = __cb_logarithm(array(10, 10));
+		$this->assertEquals(1, $actual);
+		$actual = __cb_logarithm(array(2));
+		$this->assertEquals(0.6931471805599453, $actual);
+	}
+
+	//test average
+	public function testaveragefunction() {
+		$actual = cb_average(array());
+		$this->assertEquals('', $actual);
+		$actual = cb_average(array(1234.56));
+		$this->assertNotEquals(1.23456, $actual);
+		$actual = cb_average(array(1234.56,1));
+		$this->assertEquals(617.78, $actual);
+		$actual = cb_average(array(12345,2));
+		$this->assertEquals(6173.5, $actual);
+		$actual = cb_average(array(10));
+		$this->assertEquals(10, $actual);
+		$actual = cb_average(array(22,1));
+		$this->assertEquals(11.5, $actual);
+		$actual = cb_average(array(45,2,'A'));
+		$this->assertEquals(null, $actual);
+		$actual = cb_average(array(9,9,9));
+		$this->assertEquals(9, $actual);
 	}
 }
 ?>

@@ -20,7 +20,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-class tstDateTimeField extends TestCase {
+class DateTimeFieldTest extends TestCase {
 
 	/**
 	 * Method testconvertToUserFormat
@@ -278,6 +278,28 @@ class tstDateTimeField extends TestCase {
 		$expectedDateTime['hour'] = '23';
 		$this->assertEquals($expectedDateTime, $fmtdate);
 		$current_user = $holduser;
+	}
+
+	/**
+	 * Method testdollarsignFilterForEmptyDates
+	 * @test
+	 */
+	public function testdollarsignFilterForEmptyDates() {
+		$dt = new DateTimeField('$');
+		$dt1 = new DateTimeField('--$');
+		$dt2 = new DateTimeField('$--');
+		// Format yyyy-mm-dd'
+		$this->assertEquals('$--', $dt->__convertToDBFormat('$', 'yyyy-mm-dd'));
+		$this->assertEquals('--$', $dt1->__convertToDBFormat('--$', 'yyyy-mm-dd'));
+		$this->assertEquals('$--', $dt2->__convertToDBFormat('$--', 'yyyy-mm-dd'));
+		//Format dd-mm-yyyy
+		$this->assertEquals('--$', $dt->__convertToDBFormat('$', 'dd-mm-yyyy'));
+		$this->assertEquals('$--', $dt1->__convertToDBFormat('--$', 'dd-mm-yyyy'));
+		$this->assertEquals('--$', $dt2->__convertToDBFormat('$--', 'dd-mm-yyyy'));
+		// Format mm-dd-yyyy
+		$this->assertEquals('-$-', $dt->__convertToDBFormat('$', 'mm-dd-yyyy'));
+		$this->assertEquals('$--', $dt1->__convertToDBFormat('--$', 'mm-dd-yyyy'));
+		$this->assertEquals('-$-', $dt2->__convertToDBFormat('$--', 'mm-dd-yyyy'));
 	}
 
 	/**

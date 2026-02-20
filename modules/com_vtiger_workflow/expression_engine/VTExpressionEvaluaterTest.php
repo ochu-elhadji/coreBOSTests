@@ -475,6 +475,38 @@ class VTExpressionEvaluaterTest extends TestCase {
 		/////////////////////////
 		$entityId = '11x74'; // Account
 		$entity = new VTWorkflowEntity($adminUser, $entityId);
+		$testexpression = "stringposition(cf_732, ' |##| ')+1";
+		$expectedresult = array(
+			0 => 'VTExpressionSymbol Object
+(
+    [value] => cf_732
+    [type] => string
+)
+',
+			1 => ' |##| ',
+			2 => 'Array
+(
+    [0] => Adipose 3 |##| Chronos |##| Earth
+    [1] =>  |##| 
+)
+',
+			3 => '1',
+			4 => 'Array
+(
+    [0] => 9
+    [1] => 1
+)
+'
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		$this->assertEquals(10, $exprEvaluation);
+		/////////////////////////
+		$entityId = '11x74'; // Account
+		$entity = new VTWorkflowEntity($adminUser, $entityId);
 		$testexpression = "stringreplace(' |##| ', ', ',cf_732 )";
 		$expectedresult = array(
 			0 => ' |##| ',
@@ -830,6 +862,87 @@ class VTExpressionEvaluaterTest extends TestCase {
 		$exprEvaluation = $exprEvaluater->evaluate($entity);
 		$this->assertEquals($expectedresult, $exprEvaluater->debug);
 		$this->assertEquals(65.5, $exprEvaluation);
+	}
+
+	/**
+	 * Method testIFFieldUsers
+	 * @test
+	 */
+	public function testIFFieldUsers() {
+		global $current_user;
+		$user = new Users();
+		$user->retrieveCurrentUserInfoFromFile(10); // testtz
+		$current_user = $user;
+		$entityId = '11x74';
+		$entity = new VTWorkflowEntity($user, $entityId);
+		$testexpression = "if $(assigned_user_id : (Users) id) == getCurrentUserID() then 'then' else 'else' end";
+		$expectedresult = array(
+			0 => 'VTExpressionSymbol Object
+(
+    [value] => $(assigned_user_id : (Users) id)
+    [type] => string
+)
+',
+			1 => 'Array
+(
+)
+',
+			2 => 'Array
+(
+    [0] => 19x10
+    [1] => 19x10
+)
+',
+			3 => 'Array
+(
+    [0] => VTExpressionTreeNode Object
+        (
+            [arr] => Array
+                (
+                    [0] => VTExpressionSymbol Object
+                        (
+                            [value] => ==
+                            [type] => string
+                        )
+
+                    [1] => VTExpressionSymbol Object
+                        (
+                            [value] => $(assigned_user_id : (Users) id)
+                            [type] => string
+                        )
+
+                    [2] => VTExpressionTreeNode Object
+                        (
+                            [arr] => Array
+                                (
+                                    [0] => VTExpressionSymbol Object
+                                        (
+                                            [value] => getCurrentUserID
+                                            [type] => string
+                                        )
+
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [1] => then
+    [2] => else
+)
+',
+			4 => true,
+			5 => 'then'
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		$this->assertEquals('then', $exprEvaluation);
+		$current_user = Users::getActiveAdminUser();
 	}
 
 	/**
@@ -4007,6 +4120,40 @@ class VTExpressionEvaluaterTest extends TestCase {
 	}
 
 	/**
+	 * Method testAggregtionFunction
+	 * @test
+	 */
+	public function testAggregtionFunction() {
+		global $current_user;
+		$adminUser = Users::getActiveAdminUser();
+		$entityCache = new VTEntityCache($current_user);
+		$entityId = '11x74';
+		$entity = new VTWorkflowEntity($adminUser, $entityId);
+		$testexpression = "aggregation('sum', 'Potentials', 'amount', '[probability,e,format_date(get_date(\"today\"),\"W\"),and,expression]')";
+		$expectedresult = array(
+			0 => 'sum',
+			1 => 'Potentials',
+			2 => 'amount',
+			3 => '[probability,e,format_date(get_date("today"),"W"),and,expression]',
+			4 => 'Array
+(
+    [0] => sum
+    [1] => Potentials
+    [2] => amount
+    [3] => [probability,e,format_date(get_date("today"),"W"),and,expression]
+    [4] => context is added
+)
+',
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		$this->assertEquals(0, $exprEvaluation);
+	}
+
+	/**
 	 * Method testLogicalOperators
 	 * @test
 	 */
@@ -4014,6 +4161,188 @@ class VTExpressionEvaluaterTest extends TestCase {
 		$adminUser = Users::getActiveAdminUser();
 		$entityId = '11x74'; // employees = 131
 		$entity = new VTWorkflowEntity($adminUser, $entityId);
+		$testexpression = 'regex(\'.*ley.*\', $(account_id : (Accounts) accountname))';
+		$expectedresult = array(
+			0 => '.*ley.*',
+			1 => 'VTExpressionSymbol Object
+(
+    [value] => $(account_id : (Accounts) accountname)
+    [type] => string
+)
+',
+			2 => 'Array
+(
+    [0] => .*ley.*
+    [1] => Rowley Schlimgen Inc
+)
+'
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		$this->assertTrue($exprEvaluation);
+		///////////////
+		$testexpression = 'if regex(\'.*ley.*\', $(account_id : (Accounts) accountname))==1 then 1 else 2 end';
+		$expectedresult = array(
+			0 => '.*ley.*',
+			1 => 'VTExpressionSymbol Object
+(
+    [value] => $(account_id : (Accounts) accountname)
+    [type] => string
+)
+',
+			2 => 'Array
+(
+    [0] => .*ley.*
+    [1] => Rowley Schlimgen Inc
+)
+',
+			3 => '1',
+			4 => 'Array
+(
+    [0] => 1
+    [1] => 1
+)
+',
+			5 => 'Array
+(
+    [0] => VTExpressionTreeNode Object
+        (
+            [arr] => Array
+                (
+                    [0] => VTExpressionSymbol Object
+                        (
+                            [value] => ==
+                            [type] => string
+                        )
+
+                    [1] => VTExpressionTreeNode Object
+                        (
+                            [arr] => Array
+                                (
+                                    [0] => VTExpressionSymbol Object
+                                        (
+                                            [value] => regex
+                                            [type] => string
+                                        )
+
+                                    [1] => .*ley.*
+                                    [2] => VTExpressionSymbol Object
+                                        (
+                                            [value] => $(account_id : (Accounts) accountname)
+                                            [type] => string
+                                        )
+
+                                )
+
+                        )
+
+                    [2] => 1
+                )
+
+        )
+
+    [1] => 1
+    [2] => 2
+)
+',
+			6 => true,
+			7 => '1'
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		$this->assertEquals('1', $exprEvaluation);
+		///////////////
+		$testexpression = 'if regex(\'.*ley.*\', $(account_id : (Accounts) accountname))==true then 1 else 2 end';
+		$expectedresult = array(
+			0 => '.*ley.*',
+			1 => 'VTExpressionSymbol Object
+(
+    [value] => $(account_id : (Accounts) accountname)
+    [type] => string
+)
+',
+			2 => 'Array
+(
+    [0] => .*ley.*
+    [1] => Rowley Schlimgen Inc
+)
+',
+			3 => 'VTExpressionSymbol Object
+(
+    [value] => true
+    [type] => string
+)
+',
+			4 => 'Array
+(
+    [0] => 1
+    [1] => 
+)
+',
+			5 => 'Array
+(
+    [0] => VTExpressionTreeNode Object
+        (
+            [arr] => Array
+                (
+                    [0] => VTExpressionSymbol Object
+                        (
+                            [value] => ==
+                            [type] => string
+                        )
+
+                    [1] => VTExpressionTreeNode Object
+                        (
+                            [arr] => Array
+                                (
+                                    [0] => VTExpressionSymbol Object
+                                        (
+                                            [value] => regex
+                                            [type] => string
+                                        )
+
+                                    [1] => .*ley.*
+                                    [2] => VTExpressionSymbol Object
+                                        (
+                                            [value] => $(account_id : (Accounts) accountname)
+                                            [type] => string
+                                        )
+
+                                )
+
+                        )
+
+                    [2] => VTExpressionSymbol Object
+                        (
+                            [value] => true
+                            [type] => string
+                        )
+
+                )
+
+        )
+
+    [1] => 1
+    [2] => 2
+)
+',
+			6 => false,
+			7 => '2'
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		// true is considered a string and a string comparision is evaluated > it returns false
+		$this->assertEquals('2', $exprEvaluation);
+		///////////////
 		$testexpression = 'isString($(account_id : (Accounts) accountname))';
 		$expectedresult = array(
 			0 => 'VTExpressionSymbol Object
@@ -4157,6 +4486,90 @@ class VTExpressionEvaluaterTest extends TestCase {
 		$exprEvaluation = $exprEvaluater->evaluate($entity);
 		$this->assertEquals($expectedresult, $exprEvaluater->debug);
 		$this->assertFalse($exprEvaluation);
+	}
+
+	/**
+	 * Method testPreviousValues
+	 * @test
+	 */
+	public function testPreviousValues() {
+		global $adb;
+		$adminUser = Users::getActiveAdminUser();
+		$entityId = '11x74';
+		$adb->query('update vtiger_account set employees=13, parentid=438 where accountid=74');
+		$entityData = VTEntityData::fromEntityId($adb, '74');
+		$entityData->set('employees', 13);
+		$entityData->set('account_id', 438);
+		$entityDelta = new VTEntityDelta();
+		$entityDelta->handleEvent('vtiger.entity.beforesave', $entityData);
+		$adb->query('update vtiger_account set employees=131, parentid=746 where accountid=74');
+		$entityData->set('employees', 131);
+		$entityData->set('account_id', 746);
+		$entityDelta->handleEvent('vtiger.entity.aftersave', $entityData);
+		$entity = new VTWorkflowEntity($adminUser, $entityId);
+		$testexpression = 'employees';
+		$expectedresult = array(
+			0 => 'VTExpressionSymbol Object
+(
+    [value] => employees
+    [type] => string
+)
+'
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		$this->assertEquals(131, $exprEvaluation);
+		///////////////
+		$testexpression = 'previousvalue_employees';
+		$expectedresult = array(
+			0 => 'VTExpressionSymbol Object
+(
+    [value] => previousvalue_employees
+    [type] => string
+)
+'
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		$this->assertEquals(13, $exprEvaluation);
+		///////////////
+		$testexpression = 'account_id';
+		$expectedresult = array(
+			0 => 'VTExpressionSymbol Object
+(
+    [value] => account_id
+    [type] => string
+)
+'
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		$this->assertEquals('Rowley Schlimgen Inc', $exprEvaluation);
+		///////////////
+		$testexpression = 'previousvalue_account_id';
+		$expectedresult = array(
+			0 => 'VTExpressionSymbol Object
+(
+    [value] => previousvalue_account_id
+    [type] => string
+)
+'
+		);
+		$parser = new VTExpressionParser(new VTExpressionSpaceFilter(new VTExpressionTokenizer($testexpression)));
+		$expression = $parser->expression();
+		$exprEvaluater = new VTFieldExpressionEvaluater($expression);
+		$exprEvaluation = $exprEvaluater->evaluate($entity);
+		$this->assertEquals($expectedresult, $exprEvaluater->debug);
+		$this->assertEquals('Gibbard, H Frank Iii', $exprEvaluation);
 	}
 }
 ?>

@@ -20,13 +20,13 @@
 
 use PHPUnit\Framework\TestCase;
 
-class testRequest extends TestCase {
+class RequestTest extends TestCase {
 
 	private $testdata = array();
 	private $requeststrip;
 	private $requestnotstrip;
 
-	public function setup() {
+	public function setup(): void {
 		$this->testdata = array(
 			'usrtestdmy' => 5,
 			'RETURN_MODULE' => 'Accounts',
